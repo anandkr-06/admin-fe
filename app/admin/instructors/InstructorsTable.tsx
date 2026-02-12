@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { toggleInstructor } from "@/services/instructor.service";
-import InstructorActions from "./Actions";
+import {InstructorActions} from "./Actions";
 
 type Instructor = {
   _id: string;
@@ -112,10 +112,10 @@ export default function InstructorsTable({
                 </button>
               </td>
               <td className="border p-2 text-center">
-                <button className="text-blue-600 hover:underline">
+                {/* <button className="text-blue-600 hover:underline">
                   View
-                </button>
-                {/* <InstructorActions /> */}
+                </button> */}
+                <InstructorActions />
               </td>
             </tr>
           ))}

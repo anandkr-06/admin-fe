@@ -1,21 +1,72 @@
 
-export default function InstructorActions() {
-    return (
-<div className="w-48 text-sm font-medium text-heading bg-neutral-primary-soft border border-default rounded-base">
-    <button aria-current="true" type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right text-fg-brand bg-neutral-secondary-medium border-b border-default rounded-t-base cursor-pointer focus:outline-none">
-        Profile
-    </button>
-    <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-        Settings
-    </button>
-    <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-        Messages
-    </button>
-    <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-        Options
-    </button>
-    <button disabled type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right rounded-b-base cursor-not-allowed text-fg-disabled">
-        Download
-    </button>
-</div>)
+// export default function InstructorActions() {
+//     return (
+// <div className="w-48 text-sm font-medium text-heading bg-neutral-primary-soft border border-default rounded-base">
+//     <button aria-current="true" type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right text-fg-brand bg-neutral-secondary-medium border-b border-default rounded-t-base cursor-pointer focus:outline-none">
+//         Profile
+//     </button>
+//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
+//         Settings
+//     </button>
+//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
+//         Messages
+//     </button>
+//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
+//         Options
+//     </button>
+//     <button disabled type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right rounded-b-base cursor-not-allowed text-fg-disabled">
+//         Download
+//     </button>
+// </div>)
+// }
+
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ListCheck, PencilIcon, ShareIcon, TrashIcon, View } from "lucide-react"
+
+export function InstructorActions() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Actions</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <View />
+            View Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <ListCheck />
+            Orders
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <ListCheck />
+            Private Learner
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <ListCheck />
+            Private Orders
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem variant="destructive">
+            {/* <TrashIcon /> */}
+
+            <ListCheck />
+            Stats
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
