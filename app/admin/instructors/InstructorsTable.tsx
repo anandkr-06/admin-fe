@@ -28,7 +28,7 @@ export default function InstructorsTable({
   const router = useRouter();
 
   function goToPage(page: number) {
-    router.push(`/instructors?page=${page}`);
+    router.push(`/admin/instructors?page=${page}`);
   }
   
   async function handleToggle(
