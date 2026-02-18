@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api.client";
-import {apiServerFetch} from "@/lib/api.server"
+import { apiServerFetch } from "@/lib/api.server";
 
 export async function login(email: string, password: string) {
   return apiFetch("/auth/login", {
@@ -14,6 +14,8 @@ export async function logout() {
   });
 }
 
+
 export async function getMe() {
-    return apiServerFetch("/auth/me");
+  return await apiServerFetch("/auth/me"); // may return null
 }
+

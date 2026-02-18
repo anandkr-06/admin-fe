@@ -10,41 +10,15 @@ export async function apiServerFetch(
   path: string,
   options: RequestInit = {}
 ) {
-  // ✅ Next 16 → cookies() is async
-  const cookieStore = await cookies();
+  try {
+    const cookieStore = await cookies();
 
-  const cookieHeader = cookieStore
-    .getAll()
-    .map(c => `${c.name}=${c.value}`)
-    .join("; ");
+    const cookieHeader = cookieStore
+      .getAll()
+      .map(c => `${c.name}=${c.value}`)
+      .join("; ");
 
-  let res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-      Cookie: cookieHeader,
-    },
-    cache: "no-store",
-  });
-
-  // 🔁 If token expired → try refresh
-  if (res.status === 401) {
-    const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-      },
-      cache: "no-store",
-    });
-
-    // ❌ refresh failed → go login
-    if (!refreshRes.ok) {
-      redirect("/login");
-    }
-
-    // 🔄 retry original request
-    res = await fetch(`${API_BASE}${path}`, {
+    let res = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -53,14 +27,41 @@ export async function apiServerFetch(
       },
       cache: "no-store",
     });
-  }
 
-  // ❌ Still failed → throw (prevents silent 500 crash)
-  if (!res.ok) {
-    console.error("API SERVER ERROR:", res.status, path);
-    throw new Error(`API request failed: ${res.status}`);
-  }
+    // 🔁 Try refresh on 401
+    if (res.status === 401) {
+      const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { Cookie: cookieHeader },
+        cache: "no-store",
+      });
 
-  // ✅ IMPORTANT: return parsed JSON (not Response)
-  return res.json();
+      // ❌ Refresh failed → return null (DO NOT redirect or throw here)
+      if (!refreshRes.ok) {
+        redirect("/login");
+      }
+
+      // 🔄 Retry original request
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+          Cookie: cookieHeader,
+        },
+        cache: "no-store",
+      });
+    }
+
+    // ❌ Still not OK → return null instead of throwing
+    if (!res.ok) {
+      console.error("API SERVER ERROR:", res.status, path);
+      return null;
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("apiServerFetch fatal error:", err);
+    return null; // 🚫 NEVER throw in SSR helpers
+  }
 }
