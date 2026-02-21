@@ -1,35 +1,42 @@
-// import Sidebar from "@/components/admin/sidebar";
-// import Header from "@/components/admin/header";
+"use client";
 
-// export default function AdminLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   return (
-//     <div className="flex h-screen bg-gray-50">
-//       <Sidebar />
-//       <div className="flex-1 flex flex-col">
-//         <Header />
-//         <main className="flex-1 overflow-y-auto p-6">
-//           {children}
-//         </main>
-//       </div>
-//     </div>
-//   );
-// }
 import Sidebar from "@/components/admin/sidebar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getMe } from "@/services/auth.service";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const res = await getMe(); // 🔥 redirect handled internally
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const user = await res.json();
-console.log("user me>",user);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadUser() {
+      try {
+        const me = await getMe();
+        if (!cancelled) setUser(me);
+      } catch {
+        if (!cancelled) router.replace("/login");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return null;
+
   return (
     <div className="flex h-screen">
       <Sidebar user={user} />
@@ -39,4 +46,3 @@ console.log("user me>",user);
     </div>
   );
 }
-

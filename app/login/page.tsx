@@ -13,16 +13,15 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-  
+
     try {
-      await login(email, password);
-      router.push("/admin");
-    } catch (err: any) {
+     const res =  await login(email, password);
+      // 🔁 redirect after token is saved
+      router.replace("/admin");
+    } catch (err) {
       setError("Invalid credentials");
     }
   }
-  
-  
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -32,9 +31,7 @@ export default function LoginPage() {
       >
         <h1 className="mb-4 text-xl font-bold">Admin Login</h1>
 
-        {error && (
-          <p className="mb-2 text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="mb-2 text-sm text-red-500">{error}</p>}
 
         <input
           className="mb-3 w-full border p-2"

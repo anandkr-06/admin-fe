@@ -1,18 +1,19 @@
-import { redirect } from "next/navigation";
-import { getMe } from "@/services/auth.service";
+"use client";
 
-export default async function HomePage() {
-  try {
-    const res = await getMe();
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-    if (res.ok) {
-      // ✅ logged in
-      redirect("/admin");
+export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      router.replace("/admin");
+    } else {
+      router.replace("/login");
     }
-  } catch {
-    // ignore
-  }
+  }, []);
 
-  // ❌ not logged in
-  redirect("/login");
+  return null;
 }

@@ -8,13 +8,10 @@ export default function LogoutButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false); // modal state
 
-  async function handleLogout() {
-    try {
-      await logout();
-    } finally {
-      router.push("/login");
-    }
-  }
+  const handleLogout = () => {
+    logout();                // remove tokens
+    router.replace("/login");
+  };
 
   return (
     <>
@@ -56,3 +53,5 @@ export default function LogoutButton() {
     </>
   );
 }
+
+
