@@ -1,27 +1,9 @@
+"use client";
 
-// export default function InstructorActions() {
-//     return (
-// <div className="w-48 text-sm font-medium text-heading bg-neutral-primary-soft border border-default rounded-base">
-//     <button aria-current="true" type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right text-fg-brand bg-neutral-secondary-medium border-b border-default rounded-t-base cursor-pointer focus:outline-none">
-//         Profile
-//     </button>
-//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-//         Settings
-//     </button>
-//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-//         Messages
-//     </button>
-//     <button type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-default cursor-pointer hover:bg-neutral-secondary-medium hover:text-fg-brand focus:outline-none focus:ring-2 focus:ring-brand focus:text-fg-brand">
-//         Options
-//     </button>
-//     <button disabled type="button" className="w-full px-4 py-2 font-medium text-left rtl:text-right rounded-b-base cursor-not-allowed text-fg-disabled">
-//         Download
-//     </button>
-// </div>)
-// }
+import { useRouter } from "next/navigation";
+import { deleteInstructor } from "@/services/instructor.service";
 
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,44 +11,71 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ListCheck, PencilIcon, ShareIcon, TrashIcon, View } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
 
-export function InstructorActions() {
+import { ListCheck, TrashIcon, View } from "lucide-react";
+
+export function InstructorActions({ id }: { id: string }) {
+  const router = useRouter();
+
+  async function handleDelete() {
+    if (!confirm("Delete instructor?")) return;
+
+    try {
+      await deleteInstructor(id);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed");
+    }
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Actions</Button>
+        <Button type="button" variant="outline">
+          Actions
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+
+      <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <View />
+          <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}`)}>
+            <View className="mr-2 h-4 w-4" />
             View Profile
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ListCheck />
+
+          <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}/orders`)}>
+            <ListCheck className="mr-2 h-4 w-4" />
             Orders
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ListCheck />
-            Private Learner
+
+          <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}/private-learners`)}>
+            <ListCheck className="mr-2 h-4 w-4" />
+            Private Learners
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ListCheck />
+
+          <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}/private-orders`)}>
+            <ListCheck className="mr-2 h-4 w-4" />
             Private Orders
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem variant="destructive">
-            {/* <TrashIcon /> */}
 
-            <ListCheck />
+          <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}/stats`)}>
+            <ListCheck className="mr-2 h-4 w-4" />
             Stats
           </DropdownMenuItem>
         </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          className="text-red-600 focus:text-red-600"
+          onSelect={handleDelete}
+        >
+          <TrashIcon className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
