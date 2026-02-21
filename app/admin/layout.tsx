@@ -1,16 +1,41 @@
+"use client";
+
 import Sidebar from "@/components/admin/sidebar";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getMe } from "@/services/auth.service";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getMe();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Redirect ONLY here (safe in layout)
-  if (!user) redirect("/login");
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadUser() {
+      try {
+        const me = await getMe();
+        if (!cancelled) setUser(me);
+      } catch {
+        if (!cancelled) router.replace("/login");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!user) return null;
 
   return (
     <div className="flex h-screen">
