@@ -4,55 +4,107 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api.client";
 
+type Stats = {
+  totalInstructors: number;
+  totalLearners: number;
+  activeInstructors: number;
+  activeLearners: number;
+  totalWallet: number;
+  avgExperience: string;
+};
+
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const instructors = await apiFetch("/instructors");
-      const learners = await apiFetch("/learners");
+      try {
+        setLoading(true);
 
-      const instructorData = instructors.data.filter(
-        (i: any) => !i.isDeleted
-      );
+        const [instructorsRes, learnersRes] =
+          await Promise.all([
+            apiFetch("/instructors"),
+            apiFetch("/learners"),
+          ]);
 
-      const learnerData = learners.data;
+        // ✅ Always exclude soft-deleted records
+        const instructorData =
+          (instructorsRes?.data || []).filter(
+            (i: any) => i.isDeleted !== true
+          );
 
-      const activeInstructors = instructorData.filter(
-        (i: any) => i.isActive
-      ).length;
+        const learnerData =
+          (learnersRes?.data || []).filter(
+            (l: any) => l.isDeleted !== true
+          );
 
-      const activeLearners = learnerData.filter(
-        (l: any) => l.isActive
-      ).length;
+        // ✅ Active Counts
+        const activeInstructors =
+          instructorData.filter(
+            (i: any) => i.isActive === true
+          ).length;
 
-      const totalWallet = learnerData.reduce(
-        (sum: number, l: any) =>
-          sum + (l.walletBalance || 0),
-        0
-      );
+        const activeLearners =
+          learnerData.filter(
+            (l: any) => l.isActive === true
+          ).length;
 
-      const avgExperience =
-        instructorData.reduce(
-          (sum: number, i: any) =>
-            sum + (i.instructorExperienceYears || 0),
+        // ✅ Wallet Sum
+        const totalWallet = learnerData.reduce(
+          (sum: number, l: any) =>
+            sum + Number(l.walletBalance || 0),
           0
-        ) / (instructorData.length || 1);
+        );
 
-      setStats({
-        totalInstructors: instructorData.length,
-        totalLearners: learnerData.length,
-        activeInstructors,
-        activeLearners,
-        totalWallet,
-        avgExperience: avgExperience.toFixed(1),
-      });
+        // ✅ Average Experience
+        const avgExperience =
+          instructorData.length > 0
+            ? (
+                instructorData.reduce(
+                  (sum: number, i: any) =>
+                    sum +
+                    Number(
+                      i.instructorExperienceYears || 0
+                    ),
+                  0
+                ) / instructorData.length
+              ).toFixed(1)
+            : "0.0";
+
+        setStats({
+          totalInstructors: instructorData.length,
+          totalLearners: learnerData.length,
+          activeInstructors,
+          activeLearners,
+          totalWallet,
+          avgExperience,
+        });
+      } catch (err) {
+        console.error("Dashboard load failed", err);
+        setStats({
+          totalInstructors: 0,
+          totalLearners: 0,
+          activeInstructors: 0,
+          activeLearners: 0,
+          totalWallet: 0,
+          avgExperience: "0.0",
+        });
+      } finally {
+        setLoading(false);
+      }
     }
 
     load();
   }, []);
 
-  if (!stats) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="p-6 text-gray-500">
+        Loading dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -60,49 +112,66 @@ export default function Dashboard() {
         Dashboard Overview
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <p>Total Instructors</p>
-            <p className="text-3xl font-bold">
-              {stats.totalInstructors}
-            </p>
-            <p className="text-sm text-green-600">
-              Active: {stats.activeInstructors}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Instructors"
+          value={stats!.totalInstructors}
+          subtitle={`Active: ${stats!.activeInstructors}`}
+          subtitleColor="text-green-600"
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <p>Total Learners</p>
-            <p className="text-3xl font-bold">
-              {stats.totalLearners}
-            </p>
-            <p className="text-sm text-red-600">
-              Active: {stats.activeLearners}
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Learners"
+          value={stats!.totalLearners}
+          subtitle={`Active: ${stats!.activeLearners}`}
+          subtitleColor="text-blue-600"
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <p>Total Wallet Balance</p>
-            <p className="text-3xl font-bold text-blue-600">
-              ${stats.totalWallet.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Wallet Balance"
+          value={`$${stats!.totalWallet.toFixed(2)}`}
+          valueColor="text-indigo-600"
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <p>Avg Instructor Experience</p>
-            <p className="text-3xl font-bold">
-              {stats.avgExperience} yrs
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Avg Instructor Experience"
+          value={`${stats!.avgExperience} yrs`}
+        />
       </div>
     </div>
+  );
+}
+
+/* ---------- Reusable Stat Card ---------- */
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  subtitleColor = "text-gray-500",
+  valueColor = "text-gray-900",
+}: any) {
+  return (
+    <Card className="rounded-2xl shadow-sm">
+      <CardContent className="p-6">
+        <p className="text-sm text-gray-500">
+          {title}
+        </p>
+
+        <p
+          className={`text-3xl font-bold mt-2 ${valueColor}`}
+        >
+          {value}
+        </p>
+
+        {subtitle && (
+          <p
+            className={`text-sm mt-2 ${subtitleColor}`}
+          >
+            {subtitle}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
