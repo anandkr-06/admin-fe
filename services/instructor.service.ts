@@ -35,8 +35,9 @@ export function getInstructorOrders(id: string) {
 
 /* ================= PRIVATE LEARNERS ================= */
 export function getInstructorPrivateLearners(id: string) {
-  return apiFetch(`/instructors/${id}/profile`);
+  return apiFetch(`/instructors/${id}/private-learners`);
 }
+
 
 /* ================= PRIVATE ORDERS ================= */
 export function getInstructorPrivateOrders(id: string) {
@@ -54,4 +55,47 @@ export function deleteInstructor(id: string) {
     method: "DELETE",
   });
 }
+
+export async function deactivateInstructor(id: string) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/instructors/${id}/deactivate`,
+    {
+      method: "PATCH", // confirm if PATCH or POST from backend
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to deactivate instructor");
+  }
+
+  return res.json();
+}
+
+export async function activateInstructor(id: string) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/instructors/${id}/activate`,
+    {
+      method: "PATCH", // confirm method if different
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to activate instructor");
+  }
+
+  return res.json();
+}
+
 

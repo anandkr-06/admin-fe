@@ -1,25 +1,79 @@
-import AdminPage from "@/app/admin/components/AdminPage";
-import { getInstructorStats } from "@/services/instructor.service";
+"use client";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const stats = await getInstructorStats(params.id);
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import AdminPage from "@/app/admin/components/AdminPage";
+import { getInstructorOrders } from "@/services/instructor.service";
+
+export default function InstructorStatsPage() {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    async function fetchStats() {
+      const res = await getInstructorOrders(id);
+      const orders = res.data || [];
+
+      const totalOrders = orders.length;
+
+      const totalRevenue = orders.reduce(
+        (sum: number, o: any) => sum + (o.payableAmount || 0),
+        0,
+      );
+
+      const totalHours = orders.reduce(
+        (sum: number, o: any) => sum + (o.totalHours || 0),
+        0,
+      );
+
+      const uniqueLearners = new Set(orders.map((o: any) => o.learnerId?._id));
+
+      setStats({
+        totalOrders,
+        totalRevenue,
+        totalHours,
+        activeLearners: uniqueLearners.size,
+      });
+    }
+
+    fetchStats();
+  }, [id]);
+
+  if (!stats) {
+    return (
+      <AdminPage title="Instructor Stats">
+        <div className="p-6">Loading stats...</div>
+      </AdminPage>
+    );
+  }
 
   return (
     <AdminPage title="Instructor Stats">
-      <div className="grid md:grid-cols-3 gap-4">
-        <Stat label="Total Orders" value={stats.totalOrders} />
-        <Stat label="Total Revenue" value={`₹ ${stats.totalRevenue}`} />
-        <Stat label="Active Learners" value={stats.activeLearners} />
+      <div className="grid md:grid-cols-4 gap-6">
+        <StatCard title="Total Orders" value={stats.totalOrders} />
+        <StatCard
+          title="Total Revenue"
+          value={new Intl.NumberFormat("en-AU", {
+            style: "currency",
+            currency: "AUD",
+          }).format(stats.totalRevenue)}
+        />
+        <StatCard title="Total Hours" value={`${stats.totalHours} hrs`} />
+        <StatCard title="Active Learners" value={stats.activeLearners} />
       </div>
     </AdminPage>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function StatCard({ title, value }: { title: string; value: string | number }) {
   return (
-    <div className="rounded-xl border p-6 bg-white shadow-sm">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-2xl font-semibold mt-2">{value}</p>
+    <div className="bg-white rounded-xl border shadow-sm p-6 hover:shadow-md transition">
+      <p className="text-sm text-gray-500">{title}</p>
+      <p className="text-2xl font-bold mt-2">{value}</p>
     </div>
   );
 }

@@ -1,28 +1,23 @@
-import axios from "axios";
-
-export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
-});
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://devadminapi.anylicence.com";
+export async function apiFetch(path: string, options: RequestInit = {}) {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("accessToken")
+      : null;
 
-export async function apiFetch(
-  path: string,
-  options: RequestInit = {},
-) {
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: "include", // 🔥 REQUIRED for cookies
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
     ...options,
   });
 
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Request failed");
+    throw new Error("Request failed");
   }
 
   return res.json();

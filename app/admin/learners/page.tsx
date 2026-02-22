@@ -1,43 +1,41 @@
-import Filters from "./LearnersFilters";
-import { getLearners } from "@/services/learners.service";
+"use client";
+
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api.client";
 import LearnersTable from "./LearnersTable";
+import Filters from "./LearnersFilters";
 
-export default async function LearnersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    page?: string;
-    search?: string;
-    status?: string;
-  }>;
-}) {
-  const params = await searchParams;
+export default function LearnersPage() {
+  const [data, setData] = useState<any>(null);
 
-  const page = Number(params.page || 1);
+  useEffect(() => {
+    async function fetchData() {
+      const json = await apiFetch("/learners?page=1&limit=10");
 
-  const data = await getLearners({
-    page,
-    limit: 10,
-    search: params.search,   // ✅ ONLY THIS
-    status: params.status,
-  });
+      setData({
+        data: json.data || [],
+        meta: {
+          page: json.page || 1,
+          limit: json.limit || 10,
+          total: json.total || 0,
+          totalPages: Math.ceil(
+            (json.total || 0) / (json.limit || 10)
+          ),
+        },
+      });
+    }
 
-  if (!data.data.length && page > 1) {
-    return (
-      <div className="p-6">
-        <h1 className="mb-4 text-2xl font-bold">Learners</h1>
-        <Filters />
-        <p className="text-gray-500">
-          No learners found. Try adjusting your filters.
-        </p>
-      </div>
-    );
-  }
+    fetchData();
+  }, []);
+
+  if (!data) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-2xl font-bold">Learners</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Learners</h1>
+
       <Filters />
+
       <LearnersTable
         learners={data.data}
         meta={data.meta}

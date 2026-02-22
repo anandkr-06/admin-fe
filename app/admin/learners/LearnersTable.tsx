@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { toggleInstructor } from "@/services/instructor.service";
+import { useState } from "react";
+import { toggleLearner } from "@/services/learners.service";
+
 
 type Learner = {
   _id: string;
@@ -25,120 +27,123 @@ export default function LearnersTable({
   };
 }) {
   const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   function goToPage(page: number) {
     router.push(`/admin/learners?page=${page}`);
   }
-  
-  async function handleToggle(
-    id: string,
-    isActive: boolean,
-  ) {
-    await toggleInstructor(
-      id,
-      isActive ? "deactivate" : "activate",
-    );
 
-    router.refresh(); // 🔥 re-fetch server data
+async function handleToggle(id: string, isActive: boolean) {
+  try {
+    setLoadingId(id);
+
+   await toggleLearner(id, isActive);
+
+
+    router.refresh();
+  } catch (error) {
+    console.error("Toggle failed:", error);
+  } finally {
+    setLoadingId(null);
   }
+}
+
 
   return (
     <>
-      {/* <table className="w-full border border-gray-200">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border p-2 text-left">First Name</th>
-            <th className="border p-2 text-left">Last Name</th>
-            <th className="border p-2 text-left">Email</th>
-            <th className="border p-2">Role</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {learners.map((inst) => (
-            <tr key={inst._id}>
-              <td className="border p-2">{inst.firstName}</td>
-              <td className="border p-2">{inst.lastName}</td>
-              <td className="border p-2">{inst.email}</td>
-              <td className="border p-2 text-center">{inst.role}</td>
-              <td className="border p-2 text-center">
-                {inst.isActive ? "✅ Active" : "❌ Inactive"}
-              </td>
-              <td className="border p-2 text-center">
-                <button className="text-blue-600 hover:underline">
-                  View
-                </button>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500">
+            <tr>
+              <th className="px-6 py-3">Name</th>
+              <th className="px-6 py-3">Email</th>
+              <th className="px-6 py-3">Role</th>
+              <th className="px-6 py-3">Status</th>
+              <th className="px-6 py-3 text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table> */}
-      <table className="w-full border border-gray-200">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border p-2 text-left">First Name</th>
-            <th className="border p-2 text-left">Last Name</th>
-            <th className="border p-2 text-left">Email</th>
-            <th className="border p-2">Role</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
+          </thead>
 
-        <tbody>
-          {learners.map((i) => (
-            <tr key={i._id}>
-              <td className="border p-2">{i.firstName}</td>
-              <td className="border p-2">{i.lastName}</td>
-              <td className="border p-2">{i.email}</td>
-              <td className="border p-2">
-                {i.isActive ? "Active" : "Inactive"}
-              </td>
-              <td className="border p-2">
-                <button
-                  onClick={() =>
-                    handleToggle(i._id, i.isActive)
-                  }
-                  className={`rounded px-3 py-1 text-white ${
-                    i.isActive
-                      ? "bg-red-600"
-                      : "bg-green-600"
-                  }`}
-                >
-                  {i.isActive ? "Deactivate" : "Activate"}
-                </button>
-              </td>
-              <td className="border p-2 text-center">
-                <button className="text-blue-600 hover:underline">
-                  View
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <tbody className="divide-y">
+            {learners.map((user) => (
+              <tr key={user._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 font-medium text-gray-800">
+                  {user.firstName} {user.lastName}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {user.email}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {user.role}
+                </td>
+
+                {/* Status Badge */}
+                <td className="px-6 py-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      user.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {user.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+
+                {/* Actions */}
+                <td className="px-6 py-4 text-right space-x-2">
+                  <button
+                    onClick={() =>
+                      handleToggle(user._id, user.isActive)
+                    }
+                    disabled={loadingId === user._id}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium text-white transition ${
+                      user.isActive
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-green-600 hover:bg-green-700"
+                    } ${
+                      loadingId === user._id
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    {loadingId === user._id
+                      ? "Processing..."
+                      : user.isActive
+                      ? "Deactivate"
+                      : "Activate"}
+                  </button>
+
+                  <button className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-gray-100">
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between">
-        <span>
+      <div className="flex items-center justify-between border-t px-6 py-4 text-sm">
+        <span className="text-gray-500">
           Page {meta.page} of {meta.totalPages}
         </span>
 
-        <div className="space-x-2">
+        <div className="flex gap-2">
           <button
             disabled={meta.page === 1}
             onClick={() => goToPage(meta.page - 1)}
-            className="rounded border px-3 py-1 disabled:opacity-50"
+            className="rounded-lg border px-3 py-1.5 disabled:opacity-40"
           >
-            Prev
+            Previous
           </button>
 
           <button
             disabled={meta.page === meta.totalPages}
             onClick={() => goToPage(meta.page + 1)}
-            className="rounded border px-3 py-1 disabled:opacity-50"
+            className="rounded-lg border px-3 py-1.5 disabled:opacity-40"
           >
             Next
           </button>
