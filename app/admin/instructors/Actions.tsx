@@ -68,13 +68,13 @@ export function InstructorActions({ id }: { id: string }) {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
           onSelect={handleDelete}
         >
           <TrashIcon className="mr-2 h-4 w-4" />
           Delete
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
