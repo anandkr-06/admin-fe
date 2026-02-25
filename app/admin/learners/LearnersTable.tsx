@@ -57,7 +57,6 @@ async function handleToggle(id: string, isActive: boolean) {
             <tr>
               <th className="px-6 py-3">Name</th>
               <th className="px-6 py-3">Email</th>
-              <th className="px-6 py-3">Role</th>
               <th className="px-6 py-3">Status</th>
               <th className="px-6 py-3 text-right">Actions</th>
             </tr>
@@ -74,9 +73,9 @@ async function handleToggle(id: string, isActive: boolean) {
                   {user.email}
                 </td>
 
-                <td className="px-6 py-4 text-gray-600">
+                {/* <td className="px-6 py-4 text-gray-600">
                   {user.role}
-                </td>
+                </td> */}
 
                 {/* Status Badge */}
                 <td className="px-6 py-4">

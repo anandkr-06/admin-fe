@@ -45,15 +45,16 @@ export default function OrdersPage() {
     }
   }
 
-  // ---- KPI ----
+  /* ---------------- KPI LOGIC ---------------- */
+
   const totalOrders = meta?.total || 0;
 
-  const completedOrders = orders.filter(
-    (o) => o.status === "COMPLETED"
+  const confirmedOrders = orders.filter(
+    (o) => o.status === "CONFIRMED"
   ).length;
 
-  const pendingOrders = orders.filter(
-    (o) => o.status === "PENDING_PAYMENT"
+  const pendingPayments = orders.filter(
+    (o) => o.paymentStatus === "PENDING"
   ).length;
 
   const totalRevenue = orders.reduce(
@@ -63,41 +64,40 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Orders Management
           </h1>
           <p className="text-gray-500 mt-1">
-            Track and manage all learner bookings
+            Manage learner bookings & payments
           </p>
         </div>
-
         <Button onClick={fetchOrders}>Refresh</Button>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="Total Orders" value={totalOrders} />
         <StatCard
-          title="Completed"
-          value={completedOrders}
-          gradient="from-green-500 to-emerald-600"
+          title="Confirmed Orders"
+          value={confirmedOrders}
+          gradient="from-blue-500 to-indigo-600"
         />
         <StatCard
-          title="Pending Payment"
-          value={pendingOrders}
+          title="Pending Payments"
+          value={pendingPayments}
           gradient="from-orange-400 to-amber-500"
         />
         <StatCard
           title="Revenue (AUD)"
           value={`AUD ${totalRevenue.toFixed(2)}`}
-          gradient="from-blue-500 to-indigo-600"
+          gradient="from-green-500 to-emerald-600"
         />
       </div>
 
-      {/* Filters */}
+      {/* FILTERS */}
       <Card className="rounded-2xl border shadow-sm">
         <CardContent className="p-6 grid md:grid-cols-6 gap-4">
           <Input
@@ -114,6 +114,7 @@ export default function OrdersPage() {
               setFilters({ ...filters, maxAmount: e.target.value })
             }
           />
+
           <select
             className="border rounded-lg px-3"
             onChange={(e) =>
@@ -121,8 +122,7 @@ export default function OrdersPage() {
             }
           >
             <option value="">All Status</option>
-            <option value="PENDING_PAYMENT">Pending</option>
-            <option value="COMPLETED">Completed</option>
+            <option value="CONFIRMED">Confirmed</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
 
@@ -136,28 +136,30 @@ export default function OrdersPage() {
             }
           >
             <option value="">All Payments</option>
-            <option value="PENDING">Pending</option>
             <option value="PAID">Paid</option>
+            <option value="PENDING">Pending</option>
           </select>
 
           <Button onClick={fetchOrders}>Apply</Button>
         </CardContent>
       </Card>
 
-      {/* Orders Table */}
+      {/* TABLE */}
       <Card className="rounded-2xl shadow-sm">
         <CardContent className="p-6">
           {loading ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 text-gray-500">
               Loading orders...
             </div>
+          ) : orders.length === 0 ? (
+            <EmptyState />
           ) : (
             <OrdersTable orders={orders} />
           )}
         </CardContent>
       </Card>
 
-      {/* Pagination */}
+      {/* PAGINATION */}
       {meta && (
         <div className="flex justify-end gap-3">
           <Button
@@ -188,12 +190,12 @@ export default function OrdersPage() {
   );
 }
 
-/* ---------------- Components ---------------- */
+/* ---------------- COMPONENTS ---------------- */
 
 function StatCard({
   title,
   value,
-  gradient = "from-gray-600 to-gray-800",
+  gradient = "from-gray-700 to-gray-900",
 }: any) {
   return (
     <div
@@ -215,6 +217,7 @@ function OrdersTable({ orders }: any) {
             <th className="p-3 text-left">Learner</th>
             <th className="p-3 text-left">Instructor</th>
             <th className="p-3 text-left">Vehicle</th>
+            <th className="p-3 text-left">Slots</th>
             <th className="p-3 text-left">Amount</th>
             <th className="p-3 text-left">Payment</th>
             <th className="p-3 text-left">Status</th>
@@ -230,26 +233,37 @@ function OrdersTable({ orders }: any) {
               <td className="p-3 font-medium">
                 #{order._id.slice(-6)}
               </td>
+
               <td className="p-3">
                 {order.learner?.firstName}{" "}
                 {order.learner?.lastName}
               </td>
+
               <td className="p-3">
                 {order.instructor?.firstName}{" "}
                 {order.instructor?.lastName}
               </td>
+
               <td className="p-3 capitalize">
                 {order.vehicleType}
               </td>
+
+              <td className="p-3">
+                {order.bookedSlots?.length || 0} Slots
+              </td>
+
               <td className="p-3 font-semibold">
                 AUD {order.totalAmount}
               </td>
+
               <td className="p-3">
                 <Badge status={order.paymentStatus} />
               </td>
+
               <td className="p-3">
                 <Badge status={order.status} />
               </td>
+
               <td className="p-3">
                 {new Date(order.createdAt).toLocaleDateString()}
               </td>
@@ -263,26 +277,36 @@ function OrdersTable({ orders }: any) {
 
 function Badge({ status }: any) {
   const styles: any = {
-    COMPLETED:
-      "bg-green-100 text-green-700",
-    PENDING_PAYMENT:
-      "bg-orange-100 text-orange-700",
-    CANCELLED:
-      "bg-red-100 text-red-700",
-    PENDING:
-      "bg-yellow-100 text-yellow-700",
-    PAID:
-      "bg-green-100 text-green-700",
+    CONFIRMED: "bg-blue-100 text-blue-700",
+    CANCELLED: "bg-red-100 text-red-700",
+    PAID: "bg-green-100 text-green-700",
+    PENDING: "bg-yellow-100 text-yellow-700",
+    BOOKED: "bg-indigo-100 text-indigo-700",
+    COMPLETED: "bg-green-100 text-green-700",
+    RESCHEDULED: "bg-purple-100 text-purple-700",
   };
 
   return (
     <span
       className={`px-3 py-1 rounded-full text-xs font-medium ${
-        styles[status] ||
-        "bg-gray-100 text-gray-600"
+        styles[status] || "bg-gray-100 text-gray-600"
       }`}
     >
       {status}
     </span>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-20 space-y-4">
+      <div className="text-5xl">🧾</div>
+      <h2 className="text-xl font-semibold">
+        No Orders Found
+      </h2>
+      <p className="text-gray-500 text-sm">
+        Orders will appear here once learners start booking.
+      </p>
+    </div>
   );
 }
