@@ -3,153 +3,252 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api.client";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 10,
+    status: "",
+    paymentStatus: "",
+    minAmount: "",
+    maxAmount: "",
+  });
 
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        setLoading(true);
-        const res = await apiFetch("/orders"); // API ready
-        setOrders(res.data || []);
-        setMeta(res.meta || null);
-      } catch (err) {
-        console.warn("Orders API not available");
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchOrders();
-  }, []);
+  }, [filters]);
 
-  // ---- KPI Calculations ----
-  const totalOrders = meta?.total || orders.length;
+  async function fetchOrders() {
+    try {
+      setLoading(true);
+
+      const query = new URLSearchParams(
+        Object.entries(filters)
+          .filter(([, v]) => v !== "")
+          .map(([k, v]) => [k, String(v)])
+      ).toString();
+
+      const res = await apiFetch(`/admin/orders?${query}`);
+
+      setOrders(res.data || []);
+      setMeta(res.meta || null);
+    } catch (err) {
+      console.error("Orders API error", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ---- KPI ----
+  const totalOrders = meta?.total || 0;
 
   const completedOrders = orders.filter(
-    (o) => o.status === "completed"
+    (o) => o.status === "COMPLETED"
   ).length;
 
   const pendingOrders = orders.filter(
-    (o) => o.status === "pending"
+    (o) => o.status === "PENDING_PAYMENT"
   ).length;
 
   const totalRevenue = orders.reduce(
-    (sum, o) => sum + (o.amount || 0),
+    (sum, o) => sum + (o.totalAmount || 0),
     0
   );
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Orders
+          <h1 className="text-3xl font-bold tracking-tight">
+            Orders Management
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage and track customer orders
+          <p className="text-gray-500 mt-1">
+            Track and manage all learner bookings
           </p>
         </div>
-        <Button disabled>Export</Button>
+
+        <Button onClick={fetchOrders}>Refresh</Button>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="Total Orders" value={totalOrders} />
         <StatCard
-          title="Completed Orders"
+          title="Completed"
           value={completedOrders}
-          color="text-green-600"
+          gradient="from-green-500 to-emerald-600"
         />
         <StatCard
-          title="Pending Orders"
+          title="Pending Payment"
           value={pendingOrders}
-          color="text-orange-500"
+          gradient="from-orange-400 to-amber-500"
         />
         <StatCard
-          title="Total Revenue"
-          value={`$${totalRevenue.toFixed(2)}`}
-          color="text-blue-600"
+          title="Revenue (AUD)"
+          value={`AUD ${totalRevenue.toFixed(2)}`}
+          gradient="from-blue-500 to-indigo-600"
         />
       </div>
 
-      {/* Table Section */}
+      {/* Filters */}
+      <Card className="rounded-2xl border shadow-sm">
+        <CardContent className="p-6 grid md:grid-cols-6 gap-4">
+          <Input
+            placeholder="Min Amount"
+            type="number"
+            onChange={(e) =>
+              setFilters({ ...filters, minAmount: e.target.value })
+            }
+          />
+          <Input
+            placeholder="Max Amount"
+            type="number"
+            onChange={(e) =>
+              setFilters({ ...filters, maxAmount: e.target.value })
+            }
+          />
+          <select
+            className="border rounded-lg px-3"
+            onChange={(e) =>
+              setFilters({ ...filters, status: e.target.value })
+            }
+          >
+            <option value="">All Status</option>
+            <option value="PENDING_PAYMENT">Pending</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+
+          <select
+            className="border rounded-lg px-3"
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                paymentStatus: e.target.value,
+              })
+            }
+          >
+            <option value="">All Payments</option>
+            <option value="PENDING">Pending</option>
+            <option value="PAID">Paid</option>
+          </select>
+
+          <Button onClick={fetchOrders}>Apply</Button>
+        </CardContent>
+      </Card>
+
+      {/* Orders Table */}
       <Card className="rounded-2xl shadow-sm">
         <CardContent className="p-6">
           {loading ? (
-            <div className="text-center py-16 text-gray-500">
+            <div className="text-center py-20">
               Loading orders...
             </div>
-          ) : error || orders.length === 0 ? (
-            <EmptyState />
           ) : (
             <OrdersTable orders={orders} />
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {meta && (
+        <div className="flex justify-end gap-3">
+          <Button
+            disabled={meta.page <= 1}
+            onClick={() =>
+              setFilters({
+                ...filters,
+                page: meta.page - 1,
+              })
+            }
+          >
+            Previous
+          </Button>
+          <Button
+            disabled={meta.page >= meta.totalPages}
+            onClick={() =>
+              setFilters({
+                ...filters,
+                page: meta.page + 1,
+              })
+            }
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ----------------- Components ----------------- */
+/* ---------------- Components ---------------- */
 
 function StatCard({
   title,
   value,
-  color = "text-gray-900",
+  gradient = "from-gray-600 to-gray-800",
 }: any) {
   return (
-    <Card className="rounded-2xl shadow-sm hover:shadow-md transition">
-      <CardContent className="p-6">
-        <p className="text-sm text-gray-500">
-          {title}
-        </p>
-        <p className={`text-3xl font-bold mt-2 ${color}`}>
-          {value}
-        </p>
-      </CardContent>
-    </Card>
+    <div
+      className={`rounded-2xl p-6 text-white bg-gradient-to-br ${gradient} shadow-md`}
+    >
+      <p className="text-sm opacity-80">{title}</p>
+      <p className="text-3xl font-bold mt-2">{value}</p>
+    </div>
   );
 }
 
 function OrdersTable({ orders }: any) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead className="border-b bg-gray-50">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 border-b">
           <tr>
-            <th className="p-3">Order ID</th>
-            <th className="p-3">Learner</th>
-            <th className="p-3">Instructor</th>
-            <th className="p-3">Amount</th>
-            <th className="p-3">Status</th>
-            <th className="p-3">Date</th>
+            <th className="p-3 text-left">Order</th>
+            <th className="p-3 text-left">Learner</th>
+            <th className="p-3 text-left">Instructor</th>
+            <th className="p-3 text-left">Vehicle</th>
+            <th className="p-3 text-left">Amount</th>
+            <th className="p-3 text-left">Payment</th>
+            <th className="p-3 text-left">Status</th>
+            <th className="p-3 text-left">Created</th>
           </tr>
         </thead>
         <tbody>
           {orders.map((order: any) => (
-            <tr key={order._id} className="border-b hover:bg-gray-50">
+            <tr
+              key={order._id}
+              className="border-b hover:bg-gray-50 transition"
+            >
               <td className="p-3 font-medium">
-                {order._id}
+                #{order._id.slice(-6)}
               </td>
               <td className="p-3">
-                {order.learnerName || "-"}
+                {order.learner?.firstName}{" "}
+                {order.learner?.lastName}
               </td>
               <td className="p-3">
-                {order.instructorName || "-"}
+                {order.instructor?.firstName}{" "}
+                {order.instructor?.lastName}
+              </td>
+              <td className="p-3 capitalize">
+                {order.vehicleType}
+              </td>
+              <td className="p-3 font-semibold">
+                AUD {order.totalAmount}
               </td>
               <td className="p-3">
-                ${order.amount || 0}
+                <Badge status={order.paymentStatus} />
               </td>
               <td className="p-3">
-                <StatusBadge status={order.status} />
+                <Badge status={order.status} />
               </td>
               <td className="p-3">
                 {new Date(order.createdAt).toLocaleDateString()}
@@ -162,35 +261,28 @@ function OrdersTable({ orders }: any) {
   );
 }
 
-function StatusBadge({ status }: any) {
-  const colors: any = {
-    completed: "bg-green-100 text-green-700",
-    pending: "bg-orange-100 text-orange-700",
-    cancelled: "bg-red-100 text-red-700",
+function Badge({ status }: any) {
+  const styles: any = {
+    COMPLETED:
+      "bg-green-100 text-green-700",
+    PENDING_PAYMENT:
+      "bg-orange-100 text-orange-700",
+    CANCELLED:
+      "bg-red-100 text-red-700",
+    PENDING:
+      "bg-yellow-100 text-yellow-700",
+    PAID:
+      "bg-green-100 text-green-700",
   };
 
   return (
     <span
       className={`px-3 py-1 rounded-full text-xs font-medium ${
-        colors[status] || "bg-gray-100 text-gray-700"
+        styles[status] ||
+        "bg-gray-100 text-gray-600"
       }`}
     >
-      {status || "N/A"}
+      {status}
     </span>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="text-center py-16 space-y-4">
-      <div className="text-5xl">🧾</div>
-      <h2 className="text-xl font-semibold">
-        No Orders Found
-      </h2>
-      <p className="text-gray-500 text-sm">
-        Orders will appear here once customers start purchasing.
-      </p>
-      <Button disabled>Awaiting Orders API</Button>
-    </div>
   );
 }
