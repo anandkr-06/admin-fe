@@ -141,9 +141,21 @@ function UploadBox({
         <input
           type="file"
           className="hidden"
-          onChange={(e) =>
-            onChange(e.target.files?.[0] || null)
-          }
+          onChange={(e) => {
+    const selectedFile = e.target.files?.[0] || null;
+
+    if (selectedFile) {
+      const maxSize = 1 * 1024 * 1024; // 1MB
+
+      if (selectedFile.size > maxSize) {
+        alert("File size must be less than 1MB");
+        e.target.value = ""; // reset input
+        return;
+      }
+    }
+
+    onChange(selectedFile);
+  }}
         />
       </label>
     </div>
