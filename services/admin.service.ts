@@ -29,3 +29,26 @@ export function getGiftVouchers(params: Record<string, any>) {
   const query = new URLSearchParams(params as any).toString();
   return apiFetch(`/admin/giftvouchers?${query}`);
 }
+
+export async function getReviews(params: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}) {
+  const query = new URLSearchParams(
+    Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => [k, String(v)])
+  ).toString();
+
+  return apiFetch(`/admin/reviews?${query}`);
+}
+export async function updateReviewStatus(
+  reviewId: string,
+  status: "approved" | "pending" | "rejected"
+) {
+  return apiFetch(`/admin/reviews/${reviewId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}

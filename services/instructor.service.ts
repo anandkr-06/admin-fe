@@ -98,4 +98,38 @@ export async function activateInstructor(id: string) {
   return res.json();
 }
 
+export const uploadFileToStatic = async (file: File) => {
+  const tokenData = await fetch(
+    "https://static.anylicence.com/upload/get-token"
+  );
+  const token = await tokenData.json();
 
+  const formData = new FormData();
+  formData.append("fileFor", "vehicle"); // optional: "vehicle"
+  formData.append("file", file);
+
+  const res = await fetch(
+    "https://static.anylicence.com/upload/file",
+    {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token?.token}`,
+      },
+    }
+  );
+
+  return res.json(); // should return { url: "..." }
+};
+export async function uploadInstructorVehicles(
+  instructorId: string,
+  vehicles: {
+    type: "auto" | "manual";
+    image: string;
+  }[]
+) {
+  return apiFetch(`/instructors/${instructorId}/vehicles`, {
+    method: "PATCH",
+    body: JSON.stringify({ vehicles }),
+  });
+}

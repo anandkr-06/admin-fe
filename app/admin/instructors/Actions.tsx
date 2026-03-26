@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { deleteInstructor } from "@/services/instructor.service";
-
+import { useState } from "react";
+import UploadVehicleModal from "./UploadVehicleModal";
+import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +19,7 @@ import { ListCheck, TrashIcon, View } from "lucide-react";
 
 export function InstructorActions({ id }: { id: string }) {
   const router = useRouter();
-
+ const [showVehicleModal, setShowVehicleModal] = useState(false);
   async function handleDelete() {
     if (!confirm("Delete instructor?")) return;
 
@@ -31,6 +33,7 @@ export function InstructorActions({ id }: { id: string }) {
   }
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button type="button" variant="outline">
@@ -64,6 +67,10 @@ export function InstructorActions({ id }: { id: string }) {
             <ListCheck className="mr-2 h-4 w-4" />
             Stats
           </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setShowVehicleModal(true)}>
+  <Car className="mr-2 h-4 w-4" />
+  Upload Vehicle Images
+</DropdownMenuItem>
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
@@ -77,5 +84,13 @@ export function InstructorActions({ id }: { id: string }) {
         </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
+    {showVehicleModal && (
+  <UploadVehicleModal
+    id={id}
+    onClose={() => setShowVehicleModal(false)}
+    onSuccess={() => router.refresh()}
+  />
+)}
+    </>
   );
 }
