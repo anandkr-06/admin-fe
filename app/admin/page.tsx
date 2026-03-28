@@ -126,12 +126,12 @@ export default function Dashboard() {
           subtitle={`Active: ${stats!.activeLearners}`}
           subtitleColor="text-blue-600"
         />
-
+{/* 
         <StatCard
           title="Total Wallet Balance"
           value={`$${stats!.totalWallet.toFixed(2)}`}
           valueColor="text-indigo-600"
-        />
+        /> */}
 
         <StatCard
           title="Avg Instructor Experience"
