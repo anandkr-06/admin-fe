@@ -150,7 +150,7 @@ function CoursesTable({ courses }: any) {
               </td>
 
               <td className="p-4">
-                {course.schedules?.slice(0, 2).map((s: any, i: number) => (
+                {course.courseType === "Flexible"? "No Expiry Date"  :course.schedules?.slice(0, 2).map((s: any, i: number) => (
                   <div key={i} className="text-xs text-gray-600">
                     {new Date(s.startDateTime).toLocaleDateString()} -{" "}
                     {new Date(s.endDateTime).toLocaleDateString()}
