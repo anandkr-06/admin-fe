@@ -139,7 +139,7 @@ export default function InstructorOrdersPage() {
                       <td className="p-4 font-semibold">
                         {new Intl.NumberFormat("en-AU", {
                           style: "currency",
-                          currency: "AUD",
+                          currency: "$",
                         }).format(order.totalAmount)}
                       </td>
 

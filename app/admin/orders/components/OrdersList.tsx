@@ -75,10 +75,10 @@ export default function OrdersList({ slotType, title }: Props) {
 
           <div>
             <p className="text-sm text-gray-500">
-              Revenue (AUD)
+              Revenue ($)
             </p>
             <p className="text-2xl font-bold text-green-600">
-              AUD {totalRevenue.toFixed(2)}
+              $ {totalRevenue.toFixed(2)}
             </p>
           </div>
         </CardContent>
@@ -136,7 +136,7 @@ export default function OrdersList({ slotType, title }: Props) {
                       {order.bookedSlots?.length || 0}
                     </td>
                     <td className="p-3 font-semibold">
-                      AUD {order.totalAmount}
+                      $ {order.totalAmount}
                     </td>
                     <td className="p-3">
                       {order.status}

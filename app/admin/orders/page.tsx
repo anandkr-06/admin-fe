@@ -91,8 +91,8 @@ export default function OrdersPage() {
           gradient="from-orange-400 to-amber-500"
         />
         <StatCard
-          title="Revenue (AUD)"
-          value={`AUD ${totalRevenue.toFixed(2)}`}
+          title="Revenue ($)"
+          value={`$ ${totalRevenue.toFixed(2)}`}
           gradient="from-green-500 to-emerald-600"
         />
       </div>
@@ -253,7 +253,7 @@ function OrdersTable({ orders }: any) {
               </td>
 
               <td className="p-3 font-semibold">
-                AUD {order.totalAmount}
+                $ {order.totalAmount}
               </td>
 
               <td className="p-3">

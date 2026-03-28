@@ -187,7 +187,7 @@ export default function InstructorPrivateOrdersPage() {
 function formatAUD(amount: number) {
   return new Intl.NumberFormat("en-AU", {
     style: "currency",
-    currency: "AUD",
+    currency: "$",
   }).format(amount);
 }
 

@@ -59,7 +59,7 @@ export default function InstructorStatsPage() {
           title="Total Revenue"
           value={new Intl.NumberFormat("en-AU", {
             style: "currency",
-            currency: "AUD",
+            currency: "$",
           }).format(stats.totalRevenue)}
         />
         <StatCard title="Total Hours" value={`${stats.totalHours} hrs`} />
