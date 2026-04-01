@@ -5,14 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getCourseProviders } from "@/services/admin.service";
 import { Building2, Globe } from "lucide-react";
+import toast from "react-hot-toast";
+import { toggleCourseProviderStatus } from "@/services/admin.service";
 
 export default function CourseProvidersPage() {
   const [providers, setProviders] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
+ const fetchData = async () => {
       try {
         setLoading(true);
 
@@ -31,7 +31,7 @@ export default function CourseProvidersPage() {
         setLoading(false);
       }
     }
-
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -44,9 +44,7 @@ export default function CourseProvidersPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">
-            Course Providers
-          </h1>
+          <h1 className="text-2xl font-semibold">Course Providers</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage registered training institutes
           </p>
@@ -61,8 +59,16 @@ export default function CourseProvidersPage() {
       {/* KPI Cards */}
       <div className="grid md:grid-cols-3 gap-6">
         <StatCard title="Total Providers" value={totalProviders} />
-        <StatCard title="Active" value={activeProviders} color="text-green-600" />
-        <StatCard title="Inactive" value={inactiveProviders} color="text-red-600" />
+        <StatCard
+          title="Active"
+          value={activeProviders}
+          color="text-green-600"
+        />
+        <StatCard
+          title="Inactive"
+          value={inactiveProviders}
+          color="text-red-600"
+        />
       </div>
 
       {/* Table */}
@@ -75,7 +81,7 @@ export default function CourseProvidersPage() {
           ) : providers.length === 0 ? (
             <EmptyState />
           ) : (
-            <ProvidersTable providers={providers} />
+            <ProvidersTable providers={providers} setProviders={setProviders} fetchData={fetchData}/>
           )}
         </CardContent>
       </Card>
@@ -90,26 +96,46 @@ function StatCard({ title, value, color = "text-gray-900" }: any) {
     <Card className="rounded-2xl shadow-sm hover:shadow-md transition">
       <CardContent className="p-6">
         <p className="text-sm text-gray-500">{title}</p>
-        <p className={`text-3xl font-bold mt-2 ${color}`}>
-          {value}
-        </p>
+        <p className={`text-3xl font-bold mt-2 ${color}`}>{value}</p>
       </CardContent>
     </Card>
   );
 }
 
-function ProvidersTable({ providers }: any) {
-  // 🔥 Convert API path to CDN URL
+function ProvidersTable({ providers, setProviders, fetchData }: any) {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   function getLogoUrl(logoPath?: string) {
     if (!logoPath) return null;
 
-    if (logoPath.startsWith("http")) {
-      return logoPath;
-    }
+    if (logoPath.startsWith("http")) return logoPath;
 
     const cleanPath = logoPath.replace(/^uploads\//, "");
     return `https://static.anylicence.com/media/${cleanPath}`;
   }
+
+const handleToggle = async (id: string) => {
+  try {
+    setLoadingId(id);
+   debugger
+    const currentProvider = providers.find((p) => p._id === id);
+    const newStatus = !currentProvider?.isActive;
+
+    await toggleCourseProviderStatus(id, newStatus);
+
+    toast.success(
+      `Provider ${newStatus ? "activated" : "deactivated"}`
+    );
+
+    // 🔥 RE-FETCH DATA (KEY CHANGE)
+    await fetchData();
+
+  } catch (err) {
+    toast.error("Failed to update status");
+  } finally {
+    setLoadingId(null);
+  }
+};
 
   return (
     <div className="overflow-x-auto">
@@ -123,6 +149,7 @@ function ProvidersTable({ providers }: any) {
             <th className="p-4 text-left">Consent</th>
             <th className="p-4 text-left">Status</th>
             <th className="p-4 text-left">Created</th>
+            <th className="p-4 text-left">Action</th> {/* ✅ NEW */}
           </tr>
         </thead>
 
@@ -132,7 +159,7 @@ function ProvidersTable({ providers }: any) {
 
             return (
               <tr key={p._id} className="border-b hover:bg-gray-50 transition">
-                {/* Logo + Name */}
+                {/* ✅ Institute */}
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     {logoUrl ? (
@@ -148,34 +175,31 @@ function ProvidersTable({ providers }: any) {
                     )}
 
                     <div>
-                      <div className="font-medium">
-                        {p.instituteName}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        ID: {p._id}
-                      </div>
+                      <div className="font-medium">{p.instituteName}</div>
+                      <div className="text-xs text-gray-500">ID: {p._id}</div>
                     </div>
                   </div>
                 </td>
 
-                {/* Contact */}
+                {/* ✅ Contact */}
                 <td className="p-4">
                   <div>{p.email}</div>
                   <div className="text-xs text-gray-500">
-                    {p.phone}
+                    {p.phone || "No Phone"}
                   </div>
                 </td>
 
-                {/* Location */}
+                {/* ✅ Location */}
                 <td className="p-4">
-                  {p.location?.suburb},{" "}
-                  {p.location?.state}
+                  <div>
+                    {p.location?.suburb || "-"}, {p.location?.state || "-"}
+                  </div>
                   <div className="text-xs text-gray-500">
-                    {p.location?.postCode}
+                    {p.location?.postCode || "-"}
                   </div>
                 </td>
 
-                {/* Website */}
+                {/* ✅ Website */}
                 <td className="p-4">
                   {p.websiteUrl ? (
                     <a
@@ -192,32 +216,50 @@ function ProvidersTable({ providers }: any) {
                       Visit
                     </a>
                   ) : (
-                    <span className="text-gray-400 text-xs">
-                      No Website
-                    </span>
+                    <span className="text-gray-400 text-xs">No Website</span>
                   )}
                 </td>
 
-                {/* Consent */}
+                {/* ✅ Consent */}
                 <td className="p-4 text-xs space-y-1">
+                  <div>T&C: {p.isAgreedToTermsAndConditions ? "✅" : "❌"}</div>
                   <div>
-                    T&C:{" "}
-                    {p.isAgreedToTermsAndConditions ? "✅" : "❌"}
-                  </div>
-                  <div>
-                    Offers:{" "}
-                    {p.isAgreedToCommunicationAndOffers ? "✅" : "❌"}
+                    Offers: {p.isAgreedToCommunicationAndOffers ? "✅" : "❌"}
                   </div>
                 </td>
 
-                {/* Status */}
+                {/* ✅ Status */}
                 <td className="p-4">
                   <StatusBadge active={p.isActive} />
                 </td>
 
-                {/* Created */}
-                <td className="p-4 text-gray-500">
+                {/* ✅ Created */}
+                <td className="p-4 text-gray-500 text-xs">
                   {new Date(p.createdAt).toLocaleDateString()}
+                  <div className="text-[10px]">
+                    {new Date(p.createdAt).toLocaleTimeString()}
+                  </div>
+                </td>
+
+                {/* ✅ Action */}
+                <td className="p-4">
+                  <button
+                    onClick={() => handleToggle(p._id)}
+                    disabled={loadingId === p._id}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                      p.isActive
+                        ? "bg-red-100 text-red-700 hover:bg-red-200"
+                        : "bg-green-100 text-green-700 hover:bg-green-200"
+                    } ${
+                      loadingId === p._id ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {loadingId === p._id
+                      ? "Updating..."
+                      : p.isActive
+                        ? "Deactivate"
+                        : "Activate"}
+                  </button>
                 </td>
               </tr>
             );
@@ -232,9 +274,7 @@ function StatusBadge({ active }: any) {
   return (
     <span
       className={`px-3 py-1 rounded-full text-xs font-medium ${
-        active
-          ? "bg-green-100 text-green-700"
-          : "bg-red-100 text-red-700"
+        active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
       }`}
     >
       {active ? "Active" : "Inactive"}
@@ -246,9 +286,7 @@ function EmptyState() {
   return (
     <div className="text-center py-20 space-y-4">
       <div className="text-6xl">🏫</div>
-      <h2 className="text-xl font-semibold">
-        No Course Providers Found
-      </h2>
+      <h2 className="text-xl font-semibold">No Course Providers Found</h2>
       <p className="text-gray-500 text-sm">
         Providers will appear here once registered.
       </p>

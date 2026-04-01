@@ -19,16 +19,20 @@ type Learner = {
 
 export default function LearnersTable({
   learners,
+  fetchData,
 }: {
   learners: Learner[];
+  fetchData: any
 }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleToggle(id: string, isActive: boolean) {
     try {
+      debugger
       setLoadingId(id);
       await toggleLearner(id, isActive);
+      fetchData()
       router.refresh();
     } catch (error) {
       console.error("Toggle failed:", error);

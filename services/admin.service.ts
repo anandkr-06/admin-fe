@@ -65,3 +65,21 @@ export async function updateCourseStatus(id: string, status: string) {
 
   return res.json();
 }
+export const toggleCourseProviderStatus = async (
+  id: string,
+  isActive: boolean
+) => {
+  const res = await apiFetch(
+    `/admin/course-providers/${id}/status`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ isActive }),
+    }
+  );
+
+  // if (!res.ok) {
+  //   throw new Error("Failed to update status");
+  // }
+
+  // return res.json();
+};

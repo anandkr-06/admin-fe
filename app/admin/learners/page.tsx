@@ -64,7 +64,7 @@ export default function LearnersPage() {
       {loading ? (
         <div className="p-6 text-gray-500">Loading...</div>
       ) : (
-        <LearnersTable learners={data?.data || []} />
+        <LearnersTable learners={data?.data || []} fetchData={fetchData}/>
       )}
 
       {/* ✅ Pagination (ONLY HERE) */}
