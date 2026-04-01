@@ -50,10 +50,10 @@ export default function CourseProvidersPage() {
           </p>
         </div>
 
-        <Button>
-          <Building2 size={16} className="mr-2" />
+        {/* <Button> */}
+          {/* <Building2 size={16} className="mr-2" />
           Add Provider
-        </Button>
+        </Button> */}
       </div>
 
       {/* KPI Cards */}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api.client";
 
 interface Props {
-  slotType?: "TEST" | "LESSON";
+  slotType?: "TEST" | "LESSON" | "private-orders";
   title: string;
 }
 

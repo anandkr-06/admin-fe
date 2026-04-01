@@ -11,16 +11,34 @@ export default function OrdersTablePage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
+  // ✅ FILTER STATE
+  const [filters, setFilters] = useState({
+    status: "",
+    paymentStatus: "",
+    search: "",
+  });
+
+  // ✅ FETCH DATA
   useEffect(() => {
     fetchOrders();
-  }, [page]);
+  }, [page, filters]);
 
   async function fetchOrders() {
     try {
       setLoading(true);
-      const res = await apiFetch(
-        `/admin/orders?page=${page}&limit=10`
-      );
+
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: "10",
+        ...(filters.status && { status: filters.status }),
+        ...(filters.paymentStatus && {
+          paymentStatus: filters.paymentStatus,
+        }),
+        ...(filters.search && { search: filters.search }),
+      });
+
+      const res = await apiFetch(`/admin/orders?${query}`);
+
       setOrders(res.data || []);
       setMeta(res.meta || null);
     } catch (err) {
@@ -50,13 +68,82 @@ export default function OrdersTablePage() {
 
   return (
     <div className="space-y-6">
-      {/* TABLE */}
+      {/* 🔥 FILTER BAR */}
+      <Card className="rounded-2xl shadow-sm">
+        <CardContent className="p-4 flex flex-wrap gap-4 items-center">
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search learner/instructor"
+            value={filters.search}
+            onChange={(e) => {
+              setPage(1);
+              setFilters((prev) => ({
+                ...prev,
+                search: e.target.value,
+              }));
+            }}
+            className="border px-3 py-2 rounded-lg text-sm w-60"
+          />
+
+          {/* Status Filter */}
+          {/* <select
+            value={filters.status}
+            onChange={(e) => {
+              setPage(1);
+              setFilters((prev) => ({
+                ...prev,
+                status: e.target.value,
+              }));
+            }}
+            className="border px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="CONFIRMED">CONFIRMED</option>
+            <option value="CANCELLED">CANCELLED</option>
+            <option value="RESCHEDULED">RESCHEDULED</option>
+            <option value="BOOKED">BOOKED</option>
+          </select> */}
+
+          {/* Payment Filter */}
+          <select
+            value={filters.paymentStatus}
+            onChange={(e) => {
+              setPage(1);
+              setFilters((prev) => ({
+                ...prev,
+                paymentStatus: e.target.value,
+              }));
+            }}
+            className="border px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">All Payments</option>
+            <option value="PAID">PAID</option>
+            <option value="PENDING">PENDING</option>
+          </select>
+
+          {/* Reset */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              setFilters({
+                status: "",
+                paymentStatus: "",
+                search: "",
+              });
+              setPage(1);
+            }}
+          >
+            Reset
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* 📊 TABLE */}
       <Card className="rounded-2xl shadow-sm overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
-            <div className="text-center py-20">
-              Loading...
-            </div>
+            <div className="text-center py-20">Loading...</div>
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
@@ -88,9 +175,7 @@ export default function OrdersTablePage() {
 
                     {/* Created */}
                     <td className="p-4 text-xs text-gray-500">
-                      {new Date(
-                        order.createdAt
-                      ).toLocaleString()}
+                      {new Date(order.createdAt).toLocaleString()}
                     </td>
 
                     {/* Learner */}
@@ -131,7 +216,7 @@ export default function OrdersTablePage() {
                       </p>
                     </td>
 
-                    {/* 🔥 SLOTS COLUMN (MATCHES YOUR UI) */}
+                    {/* Slots */}
                     <td className="p-4">
                       <div className="space-y-2 min-w-[180px]">
                         {order.bookedSlots?.length ? (
@@ -145,16 +230,13 @@ export default function OrdersTablePage() {
                               </p>
 
                               <p className="text-xs text-gray-600">
-                                {slot.startTime} -{" "}
-                                {slot.endTime}
+                                {slot.startTime} - {slot.endTime}
                               </p>
 
                               <div className="flex items-center gap-2 mt-2">
                                 <span
                                   className={`px-2 py-1 rounded-full text-[10px] ${
-                                    statusStyles[
-                                      slot.status
-                                    ] ||
+                                    statusStyles[slot.status] ||
                                     "bg-gray-100 text-gray-600"
                                   }`}
                                 >
@@ -183,16 +265,12 @@ export default function OrdersTablePage() {
 
                       <p className="text-gray-400">
                         Payable:{" "}
-                        {formatCurrency(
-                          order.payableAmount || 0
-                        )}
+                        {formatCurrency(order.payableAmount || 0)}
                       </p>
 
                       <span
                         className={`inline-block mt-1 px-2 py-1 rounded-full text-[10px] ${
-                          paymentStyles[
-                            order.paymentStatus
-                          ] ||
+                          paymentStyles[order.paymentStatus] ||
                           "bg-gray-100 text-gray-600"
                         }`}
                       >
@@ -219,7 +297,7 @@ export default function OrdersTablePage() {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
+      {/* 🔁 PAGINATION */}
       {meta && (
         <div className="flex justify-end gap-3">
           <Button
@@ -228,6 +306,7 @@ export default function OrdersTablePage() {
           >
             Previous
           </Button>
+
           <Button
             disabled={meta.page >= meta.totalPages}
             onClick={() => setPage((p) => p + 1)}

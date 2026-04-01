@@ -54,9 +54,9 @@ const menuItems: MenuItem[] = [
     icon: Layers,
     roles: ["ADMIN", "MANAGER"],
     children: [
-      { name: "All Orders", href: "/admin/orders", roles: ["ADMIN", "MANAGER"] },
-      { name: "Test Orders", href: "/admin/orders/test", roles: ["ADMIN", "MANAGER"] },
-      { name: "Private Orders", href: "/admin/orders/private", roles: ["ADMIN", "MANAGER"] },
+      { name: "Orders", href: "/admin/orders", roles: ["ADMIN", "MANAGER"] },
+      // { name: "Test Orders", href: "/admin/orders/test", roles: ["ADMIN", "MANAGER"] },
+      // { name: "Private Orders", href: "/admin/orders/private", roles: ["ADMIN", "MANAGER"] },
     ],
   },
 

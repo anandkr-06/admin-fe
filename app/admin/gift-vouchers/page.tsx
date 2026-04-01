@@ -55,7 +55,7 @@ export default function GiftVouchersPage() {
             Manage issued gift vouchers
           </p>
         </div>
-        <Button>Export</Button>
+        {/* <Button>Export</Button> */}
       </div>
 
       {/* KPI */}

@@ -4,7 +4,7 @@ export default function PrivateOrdersPage() {
   return (
     <OrdersList
       title="Private Lesson Orders"
-      slotType="LESSON"
+      slotType="private-orders"
     />
   );
 }
