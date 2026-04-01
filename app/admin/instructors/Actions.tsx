@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { deleteInstructor } from "@/services/instructor.service";
 import { useState } from "react";
 import UploadVehicleModal from "./UploadVehicleModal";
-import { Car } from "lucide-react";
+import { Car, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -66,6 +66,12 @@ export function InstructorActions({ id }: { id: string }) {
           <DropdownMenuItem onSelect={() => router.push(`/admin/instructors/${id}/stats`)}>
             <ListCheck className="mr-2 h-4 w-4" />
             Stats
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => router.push(`/admin/instructors/${id}/wallet`)}
+          >
+            <Wallet className="mr-2 h-4 w-4" />
+            Wallet Transactions
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setShowVehicleModal(true)}>
   <Car className="mr-2 h-4 w-4" />

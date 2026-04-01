@@ -133,3 +133,9 @@ export async function uploadInstructorVehicles(
     body: JSON.stringify({ vehicles }),
   });
 }
+
+export async function getInstructorWallet(id: string) {
+  const res = await apiFetch(`/instructors/${id}/wallet`);
+ 
+  return res.data
+}
