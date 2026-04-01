@@ -117,8 +117,7 @@ function ProvidersTable({ providers, setProviders, fetchData }: any) {
 const handleToggle = async (id: string) => {
   try {
     setLoadingId(id);
-   debugger
-    const currentProvider = providers.find((p) => p._id === id);
+    const currentProvider = providers.find((p: any) => p._id === id);
     const newStatus = !currentProvider?.isActive;
 
     await toggleCourseProviderStatus(id, newStatus);
