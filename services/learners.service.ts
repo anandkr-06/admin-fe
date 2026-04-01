@@ -1,19 +1,9 @@
-import { apiServerFetch } from "@/lib/api.server";
 import { apiFetch } from "@/lib/api.client";
 
-export function toggleLearner(id: string, isActive: boolean) {
-  return apiFetch(`/learners/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      isActive: !isActive,
-    }),
-  });
-}
-
-
-export async function getLearners(params: {
-  page: number;
-  limit: number;
+/* ================= LIST ================= */
+export function getLearners(params: {
+  page?: number;
+  limit?: number;
   search?: string;
   status?: string;
 }) {
@@ -23,23 +13,59 @@ export async function getLearners(params: {
       .map(([k, v]) => [k, String(v)])
   ).toString();
 
-  const res = await apiServerFetch(`/learners?${query}`);
+  return apiFetch(`/learners?${query}`);
+}
+export async function getLearnerProfile(id: string) {
+  return await apiFetch(`/learners/${id}/profile`);
+}
+/* ================= ACTION ================= */
+export function toggleLearner(
+  id: string,
+  isActive: boolean
+) {
+  return apiFetch(`/learners/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      isActive: !isActive, // toggle
+    }),
+  });
+}
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch learners");
-  }
 
-  const json = await res.json();
+/* ================= DELETE ================= */
+export function deleteLearner(id: string) {
+  return apiFetch(`/learners/${id}`, {
+    method: "DELETE",
+  });
+}
+// export async function getLearnerProfile(id: string) {
+//   const res = await apiFetch(`/learners/${id}/profile`);
+//   return res.data;
+// }
 
-  return {
-    data: json.data || [],
-    meta: {
-      page: json.page || 1,
-      limit: json.limit || 10,
-      total: json.total || 0,
-      totalPages: Math.ceil(
-        (json.total || 0) / (json.limit || 10)
-      ),
-    },
-  };
+export async function getLearnerOrders(id: string) {
+  const res = await apiFetch(`/learners/${id}/orders`);
+  return res.data;
+}
+
+export async function getLearnerWallet(id: string) {
+  const res = await apiFetch(`/learners/${id}/wallet`);
+ 
+  return res.data
+}
+
+export async function getLearnerReviews(id: string) {
+  const res = await apiFetch(`/learners/${id}/reviews`);
+ 
+  return res.data
+}
+
+export async function getLearnerFeedbacks(id: string) {
+  const res = await apiFetch(`/learners/${id}/feedbacks`);
+ 
+  return res.data
+}
+
+export async function getLearnerStats(id: string) {
+  return await apiFetch(`/learners/${id}/stats`);
 }

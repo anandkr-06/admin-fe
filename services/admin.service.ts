@@ -52,3 +52,16 @@ export async function updateReviewStatus(
     body: JSON.stringify({ status }),
   });
 }
+export async function updateCourseStatus(id: string, status: string) {
+  const res = await apiFetch(
+    `/courses/${id}/status`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to update course status");
+
+  return res.json();
+}
