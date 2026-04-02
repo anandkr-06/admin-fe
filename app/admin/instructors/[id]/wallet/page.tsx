@@ -87,12 +87,12 @@ export default function WalletPage() {
 
                     {/* AMOUNT */}
                     <td className="p-4 font-semibold">
-                      ₹{t.amount}
+                      ${t.amount}
                     </td>
 
                     {/* BALANCE */}
                     <td className="p-4 text-gray-600">
-                      ₹{t.balanceAfter}
+                      ${t.balanceAfter}
                     </td>
 
                     {/* STATUS */}

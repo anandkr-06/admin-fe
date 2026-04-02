@@ -72,7 +72,7 @@ export default function OrdersPage() {
 
                     <td className="p-4">{order.usedHours} hrs</td>
 
-                    <td className="p-4 font-semibold">₹{order.totalAmount}</td>
+                    <td className="p-4 font-semibold">${order.totalAmount}</td>
 
                     <td className="p-4">
                       <Badge status={order.paymentStatus} type="payment" />

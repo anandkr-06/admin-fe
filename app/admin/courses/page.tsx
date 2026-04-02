@@ -107,6 +107,7 @@ function CoursesTable({ courses, onStatusChange }: any) {
             <th className="p-4 text-left">Seats</th>
             <th className="p-4 text-left">Price</th>
             <th className="p-4 text-left">URL</th>
+            <th className="p-4 text-left">Course Type</th>
             <th className="p-4 text-left">Status</th>
             <th className="p-4 text-left">Actions</th>
           </tr>
@@ -133,7 +134,7 @@ function CoursesTable({ courses, onStatusChange }: any) {
               <td className="p-4">{course.seats}</td>
 
               <td className="p-4 text-green-600 font-medium">
-                ₹{course.price}
+                ${course.price}
               </td>
 
               <td className="p-4">
@@ -148,6 +149,9 @@ function CoursesTable({ courses, onStatusChange }: any) {
                 ) : (
                   "N/A"
                 )}
+              </td>
+               <td className="p-4">
+                <StatusBadge status={course.courseType} />
               </td>
 
               <td className="p-4">

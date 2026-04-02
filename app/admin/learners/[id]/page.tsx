@@ -72,7 +72,7 @@ export default function LearnerProfilePage() {
               </span>
 
               <span className="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">
-                Wallet ₹{data.walletBalance}
+                Wallet ${data.walletBalance}
               </span>
 
               <span
