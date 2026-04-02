@@ -225,28 +225,58 @@ export default function InstructorProfilePage() {
 
         {/* Vehicles */}
         <Card title="Vehicles">
-          <div className="flex gap-2 mb-4">
-            {["auto", "manual", "private"].map((t: any) => (
-              <button
-                key={t}
-                onClick={() => setActiveTab(t)}
-                className={`px-3 py-1 rounded ${
-                  activeTab === t ? "bg-indigo-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+  <div className="flex gap-2 mb-4">
+    {["auto", "manual", "private"].map((t: any) => (
+      <button
+        key={t}
+        onClick={() => setActiveTab(t)}
+        className={`px-3 py-1 rounded ${
+          activeTab === t ? "bg-indigo-600 text-white" : "bg-gray-100"
+        }`}
+      >
+        {t}
+      </button>
+    ))}
+  </div>
 
-          {vehicle?.hasVehicle && (
-            <div className="grid grid-cols-2 gap-3">
-              <Info label="Make" value={vehicle.details?.make} />
-              <Info label="Model" value={vehicle.details?.model} />
-              <Info label="Color" value={vehicle.details?.color} />
-            </div>
-          )}
-        </Card>
+  {!vehicle?.hasVehicle ? (
+    <p className="text-gray-500">No vehicle available</p>
+  ) : activeTab === "private" ? (
+    <div className="grid grid-cols-2 gap-3">
+      <Info label="Auto Price/hr" value={vehicle.auto?.pricePerHour} />
+      <Info label="Auto Test Price" value={vehicle.auto?.testPricePerHour} />
+      <Info label="Manual Price/hr" value={vehicle.manual?.pricePerHour} />
+      <Info label="Manual Test Price" value={vehicle.manual?.testPricePerHour} />
+    </div>
+  ) : (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+
+      {/* Pricing */}
+      <Info label="Price / Hour" value={`$${vehicle.pricePerHour}`} />
+      <Info label="Test Price / Hour" value={`$${vehicle.testPricePerHour}`} />
+
+      {/* Basic */}
+      <Info label="Make" value={vehicle.details?.make} />
+      <Info label="Model" value={vehicle.details?.model} />
+      <Info label="Color" value={vehicle.details?.color} />
+      <Info label="Year" value={vehicle.details?.year} />
+
+      {/* Advanced */}
+      <Info label="Transmission" value={vehicle.details?.transmissionType} />
+      <Info label="Safety Rating" value={vehicle.details?.ancapSafetyRating} />
+      <Info
+        label="Dual Controls"
+        value={vehicle.details?.hasDualControls ? "Yes" : "No"}
+      />
+
+      {/* Optional */}
+      <Info
+        label="Registration No"
+        value={vehicle.details?.registrationNumber}
+      />
+    </div>
+  )}
+</Card>
 
         {/* Service Areas */}
         <Card title="Service Areas">
