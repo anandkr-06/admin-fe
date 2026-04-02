@@ -225,6 +225,9 @@ export default function OrdersTablePage() {
                               key={slot._id}
                               className="border rounded-xl p-3 bg-gray-50"
                             >
+                               <div className="text-xs text-indigo-600 font-semibold mb-1">
+                                Booking ID: #{slot._id.slice(-6)}
+                              </div>
                               <p className="text-xs font-medium">
                                 {slot.date}
                               </p>

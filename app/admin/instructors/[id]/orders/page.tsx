@@ -48,8 +48,7 @@ export default function InstructorOrdersPage() {
         order._id.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus =
-        statusFilter === "ALL" ||
-        order.paymentStatus === statusFilter;
+        statusFilter === "ALL" || order.paymentStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -58,7 +57,6 @@ export default function InstructorOrdersPage() {
   return (
     <AdminPage title="Instructor Orders">
       <div className="space-y-4">
-
         {/* Top Controls */}
         <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
           <input
@@ -119,9 +117,7 @@ export default function InstructorOrdersPage() {
                           <ChevronDown
                             size={16}
                             className={`transition ${
-                              expandedRow === order._id
-                                ? "rotate-180"
-                                : ""
+                              expandedRow === order._id ? "rotate-180" : ""
                             }`}
                           />
                         </td>
@@ -140,13 +136,9 @@ export default function InstructorOrdersPage() {
                           </div>
                         </td>
 
-                        <td className="p-4 capitalize">
-                          {order.vehicleType}
-                        </td>
+                        <td className="p-4 capitalize">{order.vehicleType}</td>
 
-                        <td className="p-4">
-                          {order.usedHours} hrs
-                        </td>
+                        <td className="p-4">{order.usedHours} hrs</td>
 
                         <td className="p-4 font-semibold">
                           {new Intl.NumberFormat("en-AU", {
@@ -162,8 +154,8 @@ export default function InstructorOrdersPage() {
                                 order.paymentStatus === "PAID"
                                   ? "bg-green-100 text-green-700"
                                   : order.paymentStatus === "FAILED"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-yellow-100 text-yellow-700"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-yellow-100 text-yellow-700"
                               }`}
                           >
                             {order.paymentStatus}
@@ -177,7 +169,9 @@ export default function InstructorOrdersPage() {
                         </td>
 
                         <td className="p-4 text-gray-500 text-xs">
-                          {new Date(order.createdAt).toLocaleDateString("en-AU")}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "en-AU",
+                          )}
                         </td>
                       </tr>
 
@@ -186,7 +180,7 @@ export default function InstructorOrdersPage() {
                         <tr className="bg-gray-50">
                           <td colSpan={9} className="p-4">
                             <div className="rounded-xl border bg-white p-4 space-y-4 shadow-sm">
-
+                              
                               <div className="flex justify-between items-center">
                                 <h3 className="font-semibold text-gray-700">
                                   Booked Slots ({order.bookedSlots?.length})
@@ -203,10 +197,13 @@ export default function InstructorOrdersPage() {
                                     className="border rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition"
                                   >
                                     {/* Date + Status */}
+                                    <div className="text-xs text-indigo-600 font-semibold mb-1">
+                                Booking ID: #{slot._id.slice(-6)}
+                              </div>
                                     <div className="flex justify-between items-center mb-2">
                                       <div className="font-medium text-gray-800">
                                         {new Date(slot.date).toLocaleDateString(
-                                          "en-AU"
+                                          "en-AU",
                                         )}
                                       </div>
 
@@ -216,8 +213,8 @@ export default function InstructorOrdersPage() {
                                           slot.status === "BOOKED"
                                             ? "bg-green-100 text-green-700"
                                             : slot.status === "CANCELLED"
-                                            ? "bg-red-100 text-red-700"
-                                            : "bg-yellow-100 text-yellow-700"
+                                              ? "bg-red-100 text-red-700"
+                                              : "bg-yellow-100 text-yellow-700"
                                         }`}
                                       >
                                         {slot.status}
@@ -231,9 +228,7 @@ export default function InstructorOrdersPage() {
 
                                     {/* Type */}
                                     <div className="text-sm mt-1">
-                                      <span className="font-medium">
-                                        Type:
-                                      </span>{" "}
+                                      <span className="font-medium">Type:</span>{" "}
                                       {slot.type}
                                     </div>
 
@@ -241,8 +236,8 @@ export default function InstructorOrdersPage() {
                                     {slot.type === "LESSON" &&
                                       slot.pickupLocation && (
                                         <div className="text-xs text-gray-500 mt-2">
-                                          📍 {slot.pickupLocation.pickupAddress},{" "}
-                                          {slot.pickupLocation.suburb},{" "}
+                                          📍 {slot.pickupLocation.pickupAddress}
+                                          , {slot.pickupLocation.suburb},{" "}
                                           {slot.pickupLocation.state}
                                         </div>
                                       )}
@@ -250,16 +245,13 @@ export default function InstructorOrdersPage() {
                                     {/* Test */}
                                     {slot.type === "TEST" && (
                                       <div className="text-xs text-gray-500 mt-2 space-y-1">
-                                        <div>
-                                          📍 Test: {slot.testLocation}
-                                        </div>
+                                        <div>📍 Test: {slot.testLocation}</div>
                                         <div>
                                           Pickup:{" "}
                                           {slot.pickupPoint?.pickupPoint}
                                         </div>
                                         <div>
-                                          Drop:{" "}
-                                          {slot.dropPoint?.dropPoint}
+                                          Drop: {slot.dropPoint?.dropPoint}
                                         </div>
                                       </div>
                                     )}

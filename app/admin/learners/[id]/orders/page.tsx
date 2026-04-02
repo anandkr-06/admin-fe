@@ -4,58 +4,28 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import AdminPage from "@/app/admin/components/AdminPage";
 import { getLearnerOrders } from "@/services/learners.service";
+import { ChevronDown } from "lucide-react";
 
 export default function OrdersPage() {
   const { id } = useParams();
 
   const [orders, setOrders] = useState<any[]>([]);
-  const [search, setSearch] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState("");
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-
     getLearnerOrders(id as string).then((res) => {
       setOrders(res || []);
     });
   }, [id]);
 
-  // 🔍 FILTER LOGIC
-  const filteredOrders = orders.filter((o) => {
-    const matchesSearch = o._id
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const matchesPayment = paymentFilter
-      ? o.paymentStatus === paymentFilter
-      : true;
-
-    return matchesSearch && matchesPayment;
-  });
+  const toggleRow = (orderId: string) => {
+    setExpandedRow((prev) => (prev === orderId ? null : orderId));
+  };
 
   return (
     <AdminPage title="Orders">
-      <div className="bg-white rounded-2xl border shadow-sm">
-
-        {/* HEADER */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <input
-            placeholder="Search by order ID..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm w-64 outline-none focus:ring-2 focus:ring-indigo-200"
-          />
-
-          <select
-            value={paymentFilter}
-            onChange={(e) => setPaymentFilter(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm outline-none"
-          >
-            <option value="">All Payments</option>
-            <option value="PAID">PAID</option>
-            <option value="PENDING">PENDING</option>
-          </select>
-        </div>
+      <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
 
         {/* TABLE */}
         <div className="overflow-x-auto">
@@ -63,7 +33,8 @@ export default function OrdersPage() {
 
             {/* HEAD */}
             <thead className="bg-gray-50 border-b">
-              <tr className="text-left text-gray-500 text-xs uppercase tracking-wider">
+              <tr className="text-left text-gray-500 text-xs uppercase">
+                <th className="p-4"></th>
                 <th className="p-4">Order</th>
                 <th className="p-4">Vehicle</th>
                 <th className="p-4">Hours</th>
@@ -76,60 +47,110 @@ export default function OrdersPage() {
 
             {/* BODY */}
             <tbody>
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="text-center py-12 text-gray-400"
-                  >
-                    No Orders Found
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((o) => (
+              {orders.map((order) => (
+                <>
+                  {/* ORDER ROW */}
                   <tr
-                    key={o._id}
-                    className="border-b hover:bg-gray-50 transition"
+                    key={order._id}
+                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    onClick={() => toggleRow(order._id)}
                   >
-                    {/* ORDER */}
+                    <td className="p-4">
+                      <ChevronDown
+                        size={16}
+                        className={`transition ${
+                          expandedRow === order._id ? "rotate-180" : ""
+                        }`}
+                      />
+                    </td>
+
                     <td className="p-4 font-medium text-indigo-600">
-                      #{o._id.slice(-6)}
+                      #{order._id.slice(-6)}
                     </td>
 
-                    {/* VEHICLE */}
-                    <td className="p-4 capitalize">
-                      {o.vehicleType}
-                    </td>
+                    <td className="p-4 capitalize">{order.vehicleType}</td>
 
-                    {/* HOURS */}
+                    <td className="p-4">{order.usedHours} hrs</td>
+
+                    <td className="p-4 font-semibold">₹{order.totalAmount}</td>
+
                     <td className="p-4">
-                      {o.usedHours} hrs
+                      <Badge status={order.paymentStatus} type="payment" />
                     </td>
 
-                    {/* AMOUNT */}
-                    <td className="p-4 font-semibold">
-                      ₹{o.totalAmount}
-                    </td>
-
-                    {/* PAYMENT */}
                     <td className="p-4">
-                      <PaymentBadge status={o.paymentStatus} />
+                      <Badge status={order.status} type="status" />
                     </td>
 
-                    {/* STATUS */}
-                    <td className="p-4">
-                      <StatusBadge status={o.status} />
-                    </td>
-
-                    {/* CREATED */}
                     <td className="p-4 text-gray-500 text-xs">
-                      {new Date(o.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
 
+                  {/* ACCORDION SLOT ROW */}
+                  {expandedRow === order._id && (
+                    <tr className="bg-gray-50">
+                      <td colSpan={8} className="p-4">
+                        <div className="rounded-xl border bg-white p-4 space-y-4">
+
+                          {/* HEADER */}
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-semibold text-gray-700">
+                              Booked Slots ({order.bookedSlots?.length})
+                            </h3>
+                          </div>
+
+                          {/* SLOT GRID */}
+                          <div className="grid md:grid-cols-2 gap-4">
+                            {order.bookedSlots?.map((slot: any) => (
+                              <div
+                                key={slot._id}
+                                className="border rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition"
+                              >
+                                {/* ✅ BOOKING ID */}
+                                <div className="text-xs text-indigo-600 font-semibold mb-1">
+                                  Booking ID: #{slot._id.slice(-6)}
+                                </div>
+
+                                {/* DATE */}
+                                <div className="font-medium text-gray-800">
+                                  {new Date(slot.date).toLocaleDateString()}
+                                </div>
+
+                                {/* TIME */}
+                                <div className="text-sm text-gray-600 mt-1">
+                                  ⏰ {slot.startTime} - {slot.endTime}
+                                </div>
+
+                                {/* TYPE */}
+                                <div className="text-sm mt-1">
+                                  <span className="font-medium">Type:</span>{" "}
+                                  {slot.type}
+                                </div>
+
+                                {/* STATUS */}
+                                <div className="mt-2">
+                                  <Badge status={slot.status} type="status" />
+                                </div>
+
+                                {/* LOCATION */}
+                                {slot.pickupLocation && (
+                                  <div className="text-xs text-gray-500 mt-2">
+                                    📍 {slot.pickupLocation.pickupAddress},{" "}
+                                    {slot.pickupLocation.suburb},{" "}
+                                    {slot.pickupLocation.state}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
@@ -137,38 +158,25 @@ export default function OrdersPage() {
   );
 }
 
-/* ================= BADGES ================= */
+/* ================= BADGE ================= */
 
-function PaymentBadge({ status }: { status: string }) {
-  const map: any = {
-    PAID: "bg-green-100 text-green-600",
-    PENDING: "bg-yellow-100 text-yellow-600",
-  };
+function Badge({ status, type }: any) {
+  let styles = "bg-gray-100 text-gray-600";
 
-  return (
-    <span
-      className={`px-3 py-1 text-xs rounded-full font-medium ${
-        map[status] || "bg-gray-100 text-gray-600"
-      }`}
-    >
-      {status}
-    </span>
-  );
-}
+  if (type === "payment") {
+    if (status === "PAID") styles = "bg-green-100 text-green-700";
+    if (status === "PENDING") styles = "bg-yellow-100 text-yellow-700";
+  }
 
-function StatusBadge({ status }: { status: string }) {
-  const map: any = {
-    CONFIRMED: "bg-blue-100 text-blue-600",
-    CANCELLED: "bg-red-100 text-red-600",
-    NOSHOW: "bg-gray-200 text-gray-600",
-  };
+  if (type === "status") {
+    if (status === "CONFIRMED" || status === "BOOKED")
+      styles = "bg-green-100 text-green-700";
+    if (status === "CANCELLED") styles = "bg-red-100 text-red-700";
+    if (status === "NOSHOW") styles = "bg-gray-200 text-gray-600";
+  }
 
   return (
-    <span
-      className={`px-3 py-1 text-xs rounded-full font-medium ${
-        map[status] || "bg-gray-100 text-gray-600"
-      }`}
-    >
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles}`}>
       {status}
     </span>
   );
