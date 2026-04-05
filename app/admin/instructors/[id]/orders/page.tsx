@@ -18,6 +18,9 @@ export default function InstructorOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
+  // ✅ pagination state
+  const [page, setPage] = useState(1);
+
   const toggleRow = (id: string) => {
     setExpandedRow((prev) => (prev === id ? null : id));
   };
@@ -27,14 +30,14 @@ export default function InstructorOrdersPage() {
 
     async function fetchData() {
       setLoading(true);
-      const res = await getInstructorOrders(id);
+      const res = await getInstructorOrders(id, { page }); // ✅ pass page
       setOrders(res?.data || []);
       setMeta(res?.meta || null);
       setLoading(false);
     }
 
     fetchData();
-  }, [id]);
+  }, [id, page]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -180,7 +183,6 @@ export default function InstructorOrdersPage() {
                         <tr className="bg-gray-50">
                           <td colSpan={9} className="p-4">
                             <div className="rounded-xl border bg-white p-4 space-y-4 shadow-sm">
-                              
                               <div className="flex justify-between items-center">
                                 <h3 className="font-semibold text-gray-700">
                                   Booked Slots ({order.bookedSlots?.length})
@@ -196,10 +198,10 @@ export default function InstructorOrdersPage() {
                                     key={slot._id}
                                     className="border rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition"
                                   >
-                                    {/* Date + Status */}
                                     <div className="text-xs text-indigo-600 font-semibold mb-1">
-                                Booking ID: #{slot._id.slice(-6)}
-                              </div>
+                                      Booking ID: #{slot._id.slice(-6)}
+                                    </div>
+
                                     <div className="flex justify-between items-center mb-2">
                                       <div className="font-medium text-gray-800">
                                         {new Date(slot.date).toLocaleDateString(
@@ -221,18 +223,77 @@ export default function InstructorOrdersPage() {
                                       </span>
                                     </div>
 
-                                    {/* Time */}
                                     <div className="text-sm text-gray-600">
                                       ⏰ {slot.startTime} - {slot.endTime}
                                     </div>
 
-                                    {/* Type */}
                                     <div className="text-sm mt-1">
                                       <span className="font-medium">Type:</span>{" "}
                                       {slot.type}
                                     </div>
 
-                                    {/* Lesson */}
+                                    {/* Action Meta */}
+                                    {/* Action Meta (CANCELLED + NOSHOW) */}
+                                    {["CANCELLED", "NOSHOW"].includes(
+                                      slot.status,
+                                    ) &&
+                                      slot.actionMeta && (
+                                        <div className="mt-3 text-xs bg-red-50 border border-red-100 rounded-lg p-2 space-y-1">
+                                          <div>
+                                            <span className="font-medium text-gray-600">
+                                              Acted By:
+                                            </span>{" "}
+                                            <span className="capitalize text-red-600 font-semibold">
+                                              {slot.actionMeta.actedBy}
+                                            </span>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-gray-600">
+                                              Reason:
+                                            </span>{" "}
+                                            {slot.actionMeta.reasonType}
+                                          </div>
+
+                                          {/* ✅ Only for NOSHOW */}
+                                          {slot.status === "NOSHOW" && (
+                                            <>
+                                              {slot.actionMeta.comment && (
+                                                <div>
+                                                  <span className="font-medium text-gray-600">
+                                                    Comment:
+                                                  </span>{" "}
+                                                  {slot.actionMeta.comment}
+                                                </div>
+                                              )}
+
+                                              {slot.actionMeta.attachment && (
+                                                <div>
+                                                  <span className="font-medium text-gray-600">
+                                                    Attachment:
+                                                  </span>{" "}
+                                                  <a
+                                                    href={`https://static.anylicence.com/media/${slot.actionMeta.attachment.replace(/^uploads\//, "")}`}
+                                                    target="_blank"
+                                                    className="text-indigo-600 underline"
+                                                  >
+                                                    View File
+                                                  </a>
+                                                </div>
+                                              )}
+                                            </>
+                                          )}
+
+                                          <div>
+                                            <span className="font-medium text-gray-600">
+                                              Acted At:
+                                            </span>{" "}
+                                            {new Date(
+                                              slot.actionMeta.actedAt,
+                                            ).toLocaleString("en-AU")}
+                                          </div>
+                                        </div>
+                                      )}
                                     {slot.type === "LESSON" &&
                                       slot.pickupLocation && (
                                         <div className="text-xs text-gray-500 mt-2">
@@ -242,7 +303,6 @@ export default function InstructorOrdersPage() {
                                         </div>
                                       )}
 
-                                    {/* Test */}
                                     {slot.type === "TEST" && (
                                       <div className="text-xs text-gray-500 mt-2 space-y-1">
                                         <div>📍 Test: {slot.testLocation}</div>
@@ -270,14 +330,33 @@ export default function InstructorOrdersPage() {
           )}
         </div>
 
-        {/* Footer */}
+        {/* ✅ Pagination Footer */}
         {meta && (
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div>
-              Showing {filteredOrders.length} of {meta.total} orders
+              Showing {orders.length} of {meta.total} orders
             </div>
-            <div>
-              Page {meta.page} of {meta.totalPages}
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1 || loading}
+                className="px-3 py-1 border rounded-lg disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              <span>
+                Page {meta.page} of {meta.totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage((p) => Math.min(p + 1, meta.totalPages))}
+                disabled={page === meta.totalPages || loading}
+                className="px-3 py-1 border rounded-lg disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
         )}

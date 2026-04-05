@@ -29,8 +29,17 @@ export function getInstructorProfile(id: string) {
 }
 
 /* ================= ORDERS ================= */
-export function getInstructorOrders(id: string) {
-  return apiFetch(`/instructors/${id}/orders`);
+export async function getInstructorOrders(
+  id: string,
+  params?: { page?: number }
+) {
+  const query = new URLSearchParams();
+
+  if (params?.page) query.append("page", String(params.page));
+
+  return await apiFetch(
+    `/instructors/${id}/orders?${query.toString()}`
+  );
 }
 
 /* ================= PRIVATE LEARNERS ================= */
