@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalendarDays, ExternalLink } from "lucide-react";
 import { getCourses, updateCourseStatus } from "@/services/admin.service";
+import CourseActions from "./CourseActions";
 
 /* ---------------- Filters ---------------- */
 
@@ -16,9 +17,7 @@ function Filters({ filters, setFilters, onApply, providers }: any) {
         <Input
           placeholder="Search course..."
           value={filters.search}
-          onChange={(e) =>
-            setFilters({ ...filters, search: e.target.value })
-          }
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
         />
 
         <select
@@ -47,17 +46,13 @@ function Filters({ filters, setFilters, onApply, providers }: any) {
         <Input
           type="date"
           value={filters.endDate}
-          onChange={(e) =>
-            setFilters({ ...filters, endDate: e.target.value })
-          }
+          onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
         />
 
         <select
           className="border rounded-lg px-3"
           value={filters.sortBy}
-          onChange={(e) =>
-            setFilters({ ...filters, sortBy: e.target.value })
-          }
+          onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
         >
           <option value="createdAt">Created</option>
           <option value="price">Price</option>
@@ -86,7 +81,7 @@ function Filters({ filters, setFilters, onApply, providers }: any) {
 
 function CoursesTable({ courses, onStatusChange }: any) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
-
+ 
   async function handleAction(id: string, status: string) {
     try {
       setLoadingId(id);
@@ -118,14 +113,10 @@ function CoursesTable({ courses, onStatusChange }: any) {
             <tr key={course._id} className="border-b hover:bg-gray-50">
               <td className="p-4">
                 <div className="font-medium">{course.courseName}</div>
-                <div className="text-xs text-gray-500">
-                  {course.category}
-                </div>
+                <div className="text-xs text-gray-500">{course.category}</div>
               </td>
 
-              <td className="p-4">
-                {course.provider?.instituteName || "-"}
-              </td>
+              <td className="p-4">{course.provider?.instituteName || "-"}</td>
 
               <td className="p-4 text-xs">
                 {course.location?.suburb}, {course.location?.state}
@@ -150,15 +141,21 @@ function CoursesTable({ courses, onStatusChange }: any) {
                   "N/A"
                 )}
               </td>
-               <td className="p-4">
+              <td className="p-4">
                 <StatusBadge status={course.courseType} />
               </td>
 
               <td className="p-4">
                 <StatusBadge status={course.status} />
               </td>
-
-              <td className="p-4 flex gap-2">
+              <td className="p-4">
+                <CourseActions
+                  course={course}
+                  onStatusChange={handleAction}
+                  loadingId={loadingId}
+                />
+              </td>
+              {/* <td className="p-4 flex gap-2">
                 <Button
                   size="sm"
                   disabled={
@@ -186,7 +183,7 @@ function CoursesTable({ courses, onStatusChange }: any) {
                 >
                   Reject
                 </Button>
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>
@@ -288,7 +285,7 @@ export default function CoursesPage() {
   async function fetchProviders() {
     try {
       const res = await fetch(
-        "https://devadminapi.anylicence.com/admin/course-providers?page=1&limit=50"
+        "https://devadminapi.anylicence.com/admin/course-providers?page=1&limit=50",
       );
       const data = await res.json();
       setProviders(data.data || []);
@@ -302,9 +299,7 @@ export default function CoursesPage() {
       await updateCourseStatus(id, status);
 
       setCourses((prev) =>
-        prev.map((c) =>
-          c._id === id ? { ...c, status } : c
-        )
+        prev.map((c) => (c._id === id ? { ...c, status } : c)),
       );
     } catch (err) {
       console.error(err);
@@ -322,9 +317,7 @@ export default function CoursesPage() {
       <div className="flex justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Courses</h1>
-          <p className="text-sm text-gray-500">
-            Manage training courses
-          </p>
+          <p className="text-sm text-gray-500">Manage training courses</p>
         </div>
 
         {/* <Button>
