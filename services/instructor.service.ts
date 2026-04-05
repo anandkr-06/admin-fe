@@ -29,17 +29,16 @@ export function getInstructorProfile(id: string) {
 }
 
 /* ================= ORDERS ================= */
-export async function getInstructorOrders(
-  id: string,
-  params?: { page?: number }
-) {
+export async function getInstructorOrders(id: string, params?: any) {
   const query = new URLSearchParams();
 
-  if (params?.page) query.append("page", String(params.page));
+  if (params?.page) query.append("page", params.page);
+  if (params?.search) query.append("search", params.search);
+  if (params?.status && params.status !== "ALL") {
+    query.append("status", params.status);
+  }
 
-  return await apiFetch(
-    `/instructors/${id}/orders?${query.toString()}`
-  );
+  return apiFetch(`/instructors/${id}/orders?${query.toString()}`);
 }
 
 /* ================= PRIVATE LEARNERS ================= */

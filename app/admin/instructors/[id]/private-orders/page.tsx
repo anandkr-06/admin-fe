@@ -10,9 +10,12 @@ export default function InstructorPrivateOrdersPage() {
   const id = params?.id as string;
 
   const [orders, setOrders] = useState<any[]>([]);
+  const [meta, setMeta] = useState<any>({});
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!id) return;
@@ -20,22 +23,26 @@ export default function InstructorPrivateOrdersPage() {
     async function fetchData() {
       try {
         setLoading(true);
+
         const res = await getInstructorPrivateOrders(id);
+
         setOrders(res?.data || []);
+        setMeta(res?.meta || {});
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [id]);
+  }, [id, page]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesSearch =
+      const text =
         `${order.privateLearnerId?.firstName} ${order.privateLearnerId?.lastName} ${order.privateLearnerId?.email}`
-          .toLowerCase()
-          .includes(search.toLowerCase());
+          .toLowerCase();
+
+      const matchesSearch = text.includes(search.toLowerCase());
 
       const matchesFilter =
         filter === "ALL" || order.paymentStatus === filter;
@@ -46,22 +53,22 @@ export default function InstructorPrivateOrdersPage() {
 
   return (
     <AdminPage title="Private Orders">
-      <div className="space-y-8">
+      <div className="space-y-6">
 
         {/* Controls */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+        <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-4 items-center justify-between">
           <input
             type="text"
             placeholder="Search learner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-80 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-72 px-3 py-2 border rounded-lg text-sm"
           />
 
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="px-3 py-2 border rounded-lg text-sm"
           >
             <option value="ALL">All Payments</option>
             <option value="PAID">Paid</option>
@@ -70,161 +77,173 @@ export default function InstructorPrivateOrdersPage() {
           </select>
         </div>
 
-        {/* Content */}
-        {loading ? (
-          <div className="bg-white border rounded-2xl p-10 text-center text-gray-500 shadow-sm">
-            Loading private orders...
+        {/* Table */}
+        <div className="bg-white border rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-4 py-3 text-left">Learner</th>
+                  <th className="px-4 py-3 text-left">Contact</th>
+                  <th className="px-4 py-3 text-left">Vehicle</th>
+                  <th className="px-4 py-3 text-left">Slot</th>
+                  <th className="px-4 py-3 text-left">Location</th>
+                  <th className="px-4 py-3 text-left">Price</th>
+                  <th className="px-4 py-3 text-left">Total</th>
+                  <th className="px-4 py-3 text-left">Payment</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-left">Created</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={10} className="text-center py-10">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="text-center py-10">
+                      No data found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => {
+                    const slot = order.lessonSlots?.[0];
+
+                    return (
+                      <tr
+                        key={order._id}
+                        className="border-t hover:bg-gray-50"
+                      >
+                        {/* Learner */}
+                        <td className="px-4 py-3 font-medium">
+                          {order.privateLearnerId?.firstName}{" "}
+                          {order.privateLearnerId?.lastName}
+                        </td>
+
+                        {/* Contact */}
+                        <td className="px-4 py-3 text-gray-600">
+                          <div>{order.privateLearnerId?.email}</div>
+                          <div className="text-xs">
+                            {order.privateLearnerId?.mobileNumber}
+                          </div>
+                        </td>
+
+                        {/* Vehicle */}
+                        <td className="px-4 py-3">
+                          {order.vehicleType}
+                        </td>
+
+                        {/* Slot */}
+                        <td className="px-4 py-3">
+                          {slot?.bookingDate}
+                          <div className="text-xs text-gray-500">
+                            {slot?.startTime} - {slot?.endTime}
+                          </div>
+                        </td>
+
+                        {/* Location */}
+                        <td className="px-4 py-3 text-xs">
+                          {slot?.pickupAddress}
+                          <div>
+                            {slot?.suburb}, {slot?.state}
+                          </div>
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-4 py-3">
+                          {formatAUD(slot?.price)}
+                        </td>
+
+                        {/* Total */}
+                        <td className="px-4 py-3 font-semibold">
+                          {formatAUD(order.totalAmount)}
+                        </td>
+
+                        {/* Payment */}
+                        <td className="px-4 py-3">
+                          <PaymentBadge status={order.paymentStatus} />
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-4 py-3">
+                          <Badge status={order.status} />
+                        </td>
+
+                        {/* Created */}
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {new Date(order.createdAt).toLocaleString("en-AU", {
+                            timeZone: "Australia/Sydney",
+                          })}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="bg-white border rounded-2xl p-12 text-center text-gray-500 shadow-sm">
-            No private orders found.
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {filteredOrders.map((order) => (
-              <div
-                key={order._id}
-                className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-all p-6 space-y-6"
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4 border-t text-sm">
+            <span>
+              Page {meta?.page || 1} of {meta?.totalPages || 1}
+            </span>
+
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
               >
-                {/* Header */}
-                <div className="flex justify-between flex-wrap gap-4">
-                  <div>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {order.privateLearnerId?.firstName}{" "}
-                      {order.privateLearnerId?.lastName}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {order.privateLearnerId?.email}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {order.privateLearnerId?.mobileNumber}
-                    </p>
-                  </div>
+                Prev
+              </button>
 
-                  <div className="flex gap-2">
-                    <Badge status={order.status} />
-                    <PaymentBadge status={order.paymentStatus} />
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-6 space-y-6">
-
-                  {/* Vehicle */}
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                      Vehicle Type
-                    </p>
-                    <p className="font-medium capitalize text-gray-900">
-                      {order.vehicleType}
-                    </p>
-                  </div>
-
-                  {/* Lesson Slots */}
-                  {order.lessonSlots?.length > 0 && (
-                    <Section title="Lesson Slots">
-                      {order.lessonSlots.map((slot: any, i: number) => (
-                        <div
-                          key={i}
-                          className="bg-gray-50/60 border border-gray-100 rounded-xl p-4 text-sm space-y-1"
-                        >
-                          <p>
-                            {slot.bookingDate} | {slot.startTime} -{" "}
-                            {slot.endTime}
-                          </p>
-                          <p>
-                            {slot.pickupAddress}, {slot.suburb}, {slot.state}
-                          </p>
-                          <p className="font-semibold text-gray-900">
-                            {formatAUD(slot.price)}
-                          </p>
-                        </div>
-                      ))}
-                    </Section>
-                  )}
-
-                  {/* Test Package */}
-                  {order.testPackage && (
-                    <Section title="Test Package">
-                      <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4 text-sm space-y-1">
-                        <p>
-                          {order.testPackage.bookingDate} |{" "}
-                          {order.testPackage.startTime} -{" "}
-                          {order.testPackage.endTime}
-                        </p>
-                        <p>{order.testPackage.testLocation}</p>
-                        <p>Pickup: {order.testPackage.pickupPoint}</p>
-                        <p>Drop: {order.testPackage.dropPoint}</p>
-                        <p className="font-semibold text-gray-900">
-                          {formatAUD(order.testPackage.price)}
-                        </p>
-                      </div>
-                    </Section>
-                  )}
-                </div>
-
-                {/* Footer */}
-                <div className="flex justify-between items-center border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-400">
-                    Created:{" "}
-                    {new Date(order.createdAt).toLocaleString("en-AU")}
-                  </span>
-
-                  <span className="text-xl font-bold text-gray-900">
-                    {formatAUD(order.totalAmount)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              <button
+                disabled={page === meta?.totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </AdminPage>
   );
 }
 
-/* ---------- Currency Formatter ---------- */
+/* ---------- Utils ---------- */
 
-function formatAUD(amount: number) {
+function formatAUD(amount?: number) {
+  if (!amount) return "$0.00";
+
   return new Intl.NumberFormat("en-AU", {
     style: "currency",
-    currency: "$",
+    currency: "AUD",
   }).format(amount);
 }
-
-/* ---------- Section ---------- */
-
-function Section({ title, children }: any) {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-        {title}
-      </p>
-      <div className="space-y-3">{children}</div>
-    </div>
-  );
-}
-
-/* ---------- Status Badge ---------- */
 
 function Badge({ status }: { status: string }) {
   const colors: any = {
     CONFIRMED: "bg-green-100 text-green-700",
-    PENDING_PAYMENT: "bg-yellow-100 text-yellow-700",
     CANCELLED: "bg-red-100 text-red-700",
   };
 
   return (
     <span
-      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-        colors[status] || "bg-gray-100 text-gray-700"
+      className={`px-2 py-1 rounded text-xs ${
+        colors[status] || "bg-gray-100"
       }`}
     >
       {status}
     </span>
   );
 }
-
-/* ---------- Payment Badge ---------- */
 
 function PaymentBadge({ status }: { status: string }) {
   const colors: any = {
@@ -235,8 +254,8 @@ function PaymentBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-        colors[status] || "bg-gray-100 text-gray-700"
+      className={`px-2 py-1 rounded text-xs ${
+        colors[status] || "bg-gray-100"
       }`}
     >
       {status}

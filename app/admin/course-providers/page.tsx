@@ -25,6 +25,7 @@ export default function CourseProvidersPage() {
     endDate: "",
     page: 1,
     limit: 10,
+    sortBy: ""
   });
 
   const fetchData = async () => {
