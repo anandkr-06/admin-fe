@@ -48,10 +48,9 @@ export async function getLearnerOrders(id: string) {
   return res.data;
 }
 
-export async function getLearnerWallet(id: string) {
-  const res = await apiFetch(`/learners/${id}/wallet`);
- 
-  return res.data
+export async function getLearnerWallet(id: string, page = 1) {
+  const res = await apiFetch(`/learners/${id}/wallet?page=${page}`);
+  return res; // keep full response (data + meta)
 }
 
 export async function getLearnerReviews(id: string) {
