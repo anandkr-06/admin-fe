@@ -59,6 +59,7 @@ const menuItems: MenuItem[] = [
       // { name: "Private Orders", href: "/admin/orders/private", roles: ["ADMIN", "MANAGER"] },
     ],
   },
+  { name: "Refunds", href: "/admin/refunds", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
 
   { name: "Leads", href: "/admin/leads", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
   { name: "Reviews", href: "/admin/reviews", icon: MessageSquare, roles: ["ADMIN", "MANAGER"] },
