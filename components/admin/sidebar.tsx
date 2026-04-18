@@ -60,7 +60,7 @@ const menuItems: MenuItem[] = [
     ],
   },
   { name: "Refunds", href: "/admin/refunds", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
-
+  { name: "No Show", href: "/admin/no-show", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
   { name: "Leads", href: "/admin/leads", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
   { name: "Reviews", href: "/admin/reviews", icon: MessageSquare, roles: ["ADMIN", "MANAGER"] },
   { name: "Feedbacks", href: "/admin/feedbacks", icon: MessageSquare, roles: ["ADMIN", "MANAGER"] },
