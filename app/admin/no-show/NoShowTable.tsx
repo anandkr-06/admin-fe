@@ -8,6 +8,7 @@ export default function NoShowTable({ data, onAction }: any) {
             <th className="px-6 py-4 text-left">Learner</th>
             <th className="px-6 py-4 text-center">Slot</th>
             <th className="px-6 py-4 text-center">Reason</th>
+            <th className="px-6 py-4 text-center">Comments</th>
             <th className="px-6 py-4 text-center">Status</th>
             <th className="px-6 py-4 text-center">Action</th>
           </tr>
@@ -16,7 +17,7 @@ export default function NoShowTable({ data, onAction }: any) {
         <tbody className="divide-y">
           {data?.length === 0 ? (
             <tr>
-              <td colSpan={6} className="text-center py-12 text-gray-500">
+              <td colSpan={7} className="text-center py-12 text-gray-500">
                 No records found
               </td>
             </tr>
@@ -24,27 +25,21 @@ export default function NoShowTable({ data, onAction }: any) {
             data.map((item: any) => (
               <tr key={item._id} className="hover:bg-gray-50">
                 {/* Instructor */}
-                <td className="px-6 py-4 font-medium">
-                  {item.instructorName}
-                </td>
+                <td className="px-6 py-4 font-medium">{item.instructorName}</td>
 
                 {/* Learner */}
-                <td className="px-6 py-4">
-                  {item.learnerName || "N/A"}
-                </td>
+                <td className="px-6 py-4">{item.learnerName || "N/A"}</td>
 
                 {/* Slot */}
                 <td className="px-6 py-4 text-center">
                   <div>{item.slotDate}</div>
-                  <div className="text-xs text-gray-400">
-                    {item.startTime}
-                  </div>
+                  <div className="text-xs text-gray-400">{item.startTime}</div>
                 </td>
 
                 {/* Reason */}
-                <td className="px-6 py-4 text-center">
-                  {item.reasonType}
-                </td>
+                <td className="px-6 py-4 text-center">{item.reasonType}</td>
+
+                <td className="px-6 py-4 text-center">{item.comment || "—"}</td>
 
                 {/* Status */}
                 <td className="px-6 py-4 text-center">
