@@ -8,6 +8,7 @@ export default function NoShowTable({ data, onAction }: any) {
             <th className="px-6 py-4 text-left">Learner</th>
             <th className="px-6 py-4 text-center">Slot</th>
             <th className="px-6 py-4 text-center">Reason</th>
+            <th className="px-6 py-4 text-center">Attachment</th> {/* NEW */}
             <th className="px-6 py-4 text-center">Comments</th>
             <th className="px-6 py-4 text-center">Status</th>
             <th className="px-6 py-4 text-center">Action</th>
@@ -17,7 +18,7 @@ export default function NoShowTable({ data, onAction }: any) {
         <tbody className="divide-y">
           {data?.length === 0 ? (
             <tr>
-              <td colSpan={7} className="text-center py-12 text-gray-500">
+              <td colSpan={8} className="text-center py-12 text-gray-500">
                 No records found
               </td>
             </tr>
@@ -30,15 +31,43 @@ export default function NoShowTable({ data, onAction }: any) {
                 {/* Learner */}
                 <td className="px-6 py-4">{item.learnerName || "N/A"}</td>
 
-                {/* Slot */}
+                {/* Slot (UPDATED) */}
                 <td className="px-6 py-4 text-center">
                   <div>{item.slotDate}</div>
-                  <div className="text-xs text-gray-400">{item.startTime}</div>
+                  <div className="text-xs text-gray-400">
+                    {item.startTime} - {item.endTime}
+                  </div>
                 </td>
 
                 {/* Reason */}
                 <td className="px-6 py-4 text-center">{item.reasonType}</td>
 
+                {/* Attachment (NEW) */}
+                <td className="px-6 py-4 text-center">
+  {item.attachment ? (
+    (() => {
+      const fileUrl = `https://static.anylicence.com/media/${item.attachment.replace(
+        /^uploads\//,
+        ""
+      )}`;
+
+      return (
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 underline hover:text-indigo-800"
+        >
+          View File
+        </a>
+      );
+    })()
+  ) : (
+    <span className="text-gray-400 text-xs">No file</span>
+  )}
+</td>
+
+                {/* Comments */}
                 <td className="px-6 py-4 text-center">{item.comment || "—"}</td>
 
                 {/* Status */}
