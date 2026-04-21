@@ -12,12 +12,15 @@ export function getNoShowRequests(params: any) {
 }
 
 /* ================= ACTION ================= */
-export function approveNoShow(id: string, decision: string) {
+export const approveNoShow = (
+  id: string,
+  payload: { decision: string; remark: string }
+) => {
   return apiFetch(`/instructors/no-show-requests/${id}/approve`, {
     method: "PATCH",
-    body: JSON.stringify({ decision }),
+    body: JSON.stringify(payload),
   });
-}
+};
 
 export function rejectNoShow(id: string, remark: string) {
   return apiFetch(`/instructors/no-show-requests/${id}/reject`, {

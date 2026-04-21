@@ -29,13 +29,6 @@ export default function NoShowTable({ data, onAction }: any) {
       setLoadingId(item._id);
 
       await onAction(type, item);
-
-      showToast(
-        type === "approve"
-          ? "No-show request approved"
-          : "No-show request rejected",
-        "success"
-      );
     } catch (err) {
       showToast("Action failed. Please try again.", "error");
     } finally {
@@ -65,6 +58,7 @@ export default function NoShowTable({ data, onAction }: any) {
             <th className="px-6 py-4 text-center">Reason</th>
             <th className="px-6 py-4 text-center">Attachment</th>
             <th className="px-6 py-4 text-center">Comments</th>
+            <th className="px-6 py-4 text-center">Admin Remark</th>
             <th className="px-6 py-4 text-center">Status</th>
             <th className="px-6 py-4 text-center">Action</th>
           </tr>
@@ -84,7 +78,7 @@ export default function NoShowTable({ data, onAction }: any) {
               const fileUrl = item.attachment
                 ? `https://static.anylicence.com/media/${item.attachment.replace(
                     /^uploads\//,
-                    ""
+                    "",
                   )}`
                 : null;
 
@@ -96,9 +90,7 @@ export default function NoShowTable({ data, onAction }: any) {
                   </td>
 
                   {/* Learner */}
-                  <td className="px-6 py-4">
-                    {item.learnerName || "N/A"}
-                  </td>
+                  <td className="px-6 py-4">{item.learnerName || "N/A"}</td>
 
                   {/* Slot */}
                   <td className="px-6 py-4 text-center">
@@ -109,9 +101,7 @@ export default function NoShowTable({ data, onAction }: any) {
                   </td>
 
                   {/* Reason */}
-                  <td className="px-6 py-4 text-center">
-                    {item.reasonType}
-                  </td>
+                  <td className="px-6 py-4 text-center">{item.reasonType}</td>
 
                   {/* Attachment */}
                   <td className="px-6 py-4 text-center">
@@ -134,11 +124,15 @@ export default function NoShowTable({ data, onAction }: any) {
                     {item.comment || "—"}
                   </td>
 
+                  <td className="px-6 py-4 text-center">
+                    {item.adminRemark || "—"}
+                  </td>
+
                   {/* Status */}
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle(
-                        item.status
+                        item.status,
                       )}`}
                     >
                       {item.status}
@@ -170,7 +164,7 @@ export default function NoShowTable({ data, onAction }: any) {
                         </button>
 
                         {/* REJECT */}
-                        <button
+                        {/* <button
                           disabled={isLoading}
                           onClick={() => handleAction("reject", item)}
                           className="
@@ -187,7 +181,7 @@ export default function NoShowTable({ data, onAction }: any) {
                             <span className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                           )}
                           Reject
-                        </button>
+                        </button> */}
                       </div>
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
