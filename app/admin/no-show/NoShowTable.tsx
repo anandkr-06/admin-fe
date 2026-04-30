@@ -1,3 +1,4 @@
+import { ENV } from "@/lib/utils";
 import { useState } from "react";
 
 /* ---------------- TOAST ---------------- */
@@ -76,7 +77,7 @@ export default function NoShowTable({ data, onAction }: any) {
               const isLoading = loadingId === item._id;
 
               const fileUrl = item.attachment
-                ? `https://static.anylicence.com/media/${item.attachment.replace(
+                ? `${ENV.IMAGE_MEDIA_URL}${item.attachment.replace(
                     /^uploads\//,
                     "",
                   )}`

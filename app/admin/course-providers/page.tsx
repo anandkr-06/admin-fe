@@ -12,6 +12,7 @@ import {
   getCourseProviders,
   toggleCourseProvider,
 } from "@/services/courseProvider.service";
+import { ENV } from "@/lib/utils";
 
 export default function CourseProvidersPage() {
   const [providers, setProviders] = useState<any[]>([]);
@@ -219,7 +220,7 @@ function Row({ p, refresh }: any) {
   const getLogo = () => {
     if (!p.logoUrl) return null;
     if (p.logoUrl.startsWith("http")) return p.logoUrl;
-    return `https://static.anylicence.com/media/${p.logoUrl.replace(
+    return `${ENV.IMAGE_MEDIA_URL}${p.logoUrl.replace(
       "uploads/",
       ""
     )}`;

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import AdminPage from "@/app/admin/components/AdminPage";
 import { getLearnerFeedbacks } from "@/services/learners.service";
+import { ENV } from "@/lib/utils";
 
 export default function FeedbackPage() {
   const { id } = useParams();
@@ -78,7 +79,7 @@ export default function FeedbackPage() {
                 {/* ATTACHMENT */}
                 {f.fileUrl ? (
                   <a
-                    href={"https://static.anylicence.com/media/"+f.fileUrl.toString().replace("uploads/", "")}
+                    href={`${ENV.IMAGE_MEDIA_URL}${f.fileUrl.toString().replace("uploads/", "")}`}
                     target="_blank"
                     className="text-indigo-600 hover:underline"
                   >

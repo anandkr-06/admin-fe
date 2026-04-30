@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Globe } from "lucide-react";
 import toast from "react-hot-toast";
 import { toggleCourseProviderStatus } from "@/services/admin.service";
+import { ENV } from "@/lib/utils";
 
 export default function ProvidersTable({
   providers,
@@ -22,7 +23,7 @@ export default function ProvidersTable({
     if (logoPath.startsWith("http")) return logoPath;
 
     const cleanPath = logoPath.replace(/^uploads\//, "");
-    return `https://static.anylicence.com/media/${cleanPath}`;
+    return `${ENV.IMAGE_MEDIA_URL}${cleanPath}`;
   }
 
   async function handleToggle(id: string, isActive: boolean) {

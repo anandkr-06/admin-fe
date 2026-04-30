@@ -9,9 +9,10 @@ import {
   deactivateInstructor,
   activateInstructor,
 } from "@/services/instructor.service";
+import { ENV } from "@/lib/utils";
 
 /* ---------------- HELPERS ---------------- */
-export const IMAGE_DOMAIN = "https://static.anylicence.com/media/";
+export const IMAGE_DOMAIN = ENV.IMAGE_MEDIA_URL;
 
 function mergeSlots(slots: any[]) {
   if (!slots?.length) return [];

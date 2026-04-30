@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getFeedbacks } from "@/services/admin.service";
 import { MessageSquare, Paperclip } from "lucide-react";
+import { ENV } from "@/lib/utils";
 
 export default function FeedbackPage() {
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
@@ -101,7 +102,7 @@ function FeedbackTable({ feedbacks }: any) {
     if (filePath.startsWith("http")) return filePath;
 
     const cleanPath = filePath.replace(/^uploads\//, "");
-    return `https://static.anylicence.com/media/${cleanPath}`;
+    return `${ENV.IMAGE_MEDIA_URL}${cleanPath}`;
   }
 
   function isImage(filePath?: string) {

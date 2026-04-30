@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { getInstructorOrders } from "@/services/instructor.service";
 import AdminPage from "@/app/admin/components/AdminPage";
 import { ChevronDown } from "lucide-react";
+import { ENV } from "@/lib/utils";
 
 export default function InstructorOrdersPage() {
   const params = useParams();
@@ -249,7 +250,7 @@ export default function InstructorOrdersPage() {
                                                   Attachment:
                                                 </span>{" "}
                                                 <a
-                                                  href={`https://static.anylicence.com/media/${slot.actionMeta.attachment.replace(/^uploads\//, "")}`}
+                                                  href={`${ENV.IMAGE_MEDIA_URL}${slot.actionMeta.attachment.replace(/^uploads\//, "")}`}
                                                   target="_blank"
                                                   className="text-indigo-600 underline"
                                                 >

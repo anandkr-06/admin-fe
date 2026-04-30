@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api.client";
+import { ENV } from "@/lib/utils";
 
 export function getInstructors(params: {
   page?: number;
@@ -108,7 +109,7 @@ export async function activateInstructor(id: string) {
 
 export const uploadFileToStatic = async (file: File) => {
   const tokenData = await fetch(
-    "https://static.anylicence.com/upload/get-token"
+    `${ENV.IMAGE_UPLOAD_URL}get-token`
   );
   const token = await tokenData.json();
 
@@ -117,7 +118,7 @@ export const uploadFileToStatic = async (file: File) => {
   formData.append("file", file);
 
   const res = await fetch(
-    "https://static.anylicence.com/upload/file",
+    `${ENV.IMAGE_UPLOAD_URL}file`,
     {
       method: "POST",
       body: formData,
