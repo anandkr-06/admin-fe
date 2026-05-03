@@ -8,6 +8,7 @@ import {
   getInstructorProfile,
   deactivateInstructor,
   activateInstructor,
+  toggleInstructorPublish,
 } from "@/services/instructor.service";
 import { ENV } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ function mergeSlots(slots: any[]) {
   if (!slots?.length) return [];
 
   const sorted = [...slots].sort((a, b) =>
-    a.startTime.localeCompare(b.startTime)
+    a.startTime.localeCompare(b.startTime),
   );
 
   const merged: any[] = [];
@@ -99,15 +100,13 @@ function AvailabilitySection({ availability }: any) {
                 {mergedSlots.map((slot: any, idx: number) => (
                   <button
                     key={idx}
-                    onClick={() =>
-                      setSelectedSlot({ ...slot, date: day.date })
-                    }
+                    onClick={() => setSelectedSlot({ ...slot, date: day.date })}
                     className={`text-xs px-2 py-1 rounded ${
                       slot.isBooked
                         ? "bg-red-100 text-red-600"
                         : slot.isTempBlocked
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-green-100 text-green-700"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
                     }`}
                   >
                     {slot.startTime} - {slot.endTime}
@@ -126,35 +125,49 @@ function AvailabilitySection({ availability }: any) {
             <h4 className="font-semibold mb-3">Slot Details</h4>
 
             <div className="space-y-2 text-sm">
-              <p><b>Date:</b> {selectedSlot.date}</p>
-              <p><b>Time:</b> {selectedSlot.startTime} - {selectedSlot.endTime}</p>
+              <p>
+                <b>Date:</b> {selectedSlot.date}
+              </p>
+              <p>
+                <b>Time:</b> {selectedSlot.startTime} - {selectedSlot.endTime}
+              </p>
               <p>
                 <b>Status:</b>{" "}
                 {selectedSlot.isBooked
                   ? "Booked"
                   : selectedSlot.isTempBlocked
-                  ? "Blocked"
-                  : "Available"}
+                    ? "Blocked"
+                    : "Available"}
               </p>
 
               {selectedSlot.bookingId && (
-                <p><b>Booking ID:</b> {selectedSlot.bookingId}</p>
+                <p>
+                  <b>Booking ID:</b> {selectedSlot.bookingId}
+                </p>
               )}
 
               {selectedSlot.tempBookingId && (
-                <p><b>Temp Booking ID:</b> {selectedSlot.tempBookingId}</p>
+                <p>
+                  <b>Temp Booking ID:</b> {selectedSlot.tempBookingId}
+                </p>
               )}
 
               {selectedSlot.pickupAddress && (
-                <p><b>Pickup:</b> {selectedSlot.pickupAddress}</p>
+                <p>
+                  <b>Pickup:</b> {selectedSlot.pickupAddress}
+                </p>
               )}
 
               {selectedSlot.suburb && (
-                <p><b>Suburb:</b> {selectedSlot.suburb}</p>
+                <p>
+                  <b>Suburb:</b> {selectedSlot.suburb}
+                </p>
               )}
 
               {selectedSlot.state && (
-                <p><b>State:</b> {selectedSlot.state}</p>
+                <p>
+                  <b>State:</b> {selectedSlot.state}
+                </p>
               )}
             </div>
 
@@ -180,7 +193,32 @@ export default function InstructorProfilePage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("auto");
+  const [actionLoading, setActionLoading] = useState(false);
+  const handleTogglePublish = async () => {
+    try {
+      setActionLoading(true);
 
+      const isPublished = data?.isPublish;
+
+      const action = isPublished ? "unpublish" : "publish";
+
+     const resData= await toggleInstructorPublish(id, action);
+     debugger
+      toast.success(
+        action === "publish"
+          ? "Instructor published successfully"
+          : "Instructor unpublished successfully",
+      );
+
+      // Refresh profile
+     const updated = await getInstructorProfile(id);
+      setData(updated);
+    } catch (err: any) {
+      toast.error(err?.message || "Something went wrong");
+    } finally {
+      setActionLoading(false);
+    }
+  };
   useEffect(() => {
     if (!id) return;
 
@@ -195,7 +233,8 @@ export default function InstructorProfilePage() {
     })();
   }, [id]);
 
-  if (loading) return <AdminPage title="Instructor Profile">Loading...</AdminPage>;
+  if (loading)
+    return <AdminPage title="Instructor Profile">Loading...</AdminPage>;
   if (!data) return <AdminPage title="Instructor Profile">Error</AdminPage>;
 
   const vehicle = data.vehicles?.[activeTab];
@@ -203,7 +242,6 @@ export default function InstructorProfilePage() {
   return (
     <AdminPage title="Instructor Profile">
       <div className="space-y-6">
-
         {/* Header */}
         <div className="bg-white p-6 rounded-xl border">
           <h2 className="text-xl font-semibold">{data.name}</h2>
@@ -214,7 +252,10 @@ export default function InstructorProfilePage() {
         <div className="grid md:grid-cols-2 gap-6">
           <Card title="Metadata">
             <Info label="ID" value={data.id} />
-            <Info label="Created" value={new Date(data.createdAt).toLocaleString()} />
+            <Info
+              label="Created"
+              value={new Date(data.createdAt).toLocaleString()}
+            />
             <Info label="Verified" value={data.isVerified ? "Yes" : "No"} />
           </Card>
 
@@ -226,114 +267,185 @@ export default function InstructorProfilePage() {
 
         {/* Vehicles */}
         <Card title="Vehicles">
-  <div className="flex gap-2 mb-4">
-    {["auto", "manual", "private"].map((t: any) => (
-      <button
-        key={t}
-        onClick={() => setActiveTab(t)}
-        className={`px-3 py-1 rounded ${
-          activeTab === t ? "bg-indigo-600 text-white" : "bg-gray-100"
-        }`}
-      >
-        {t}
-      </button>
-    ))}
-  </div>
+          <div className="flex gap-2 mb-4">
+            {["auto", "manual", "private"].map((t: any) => (
+              <button
+                key={t}
+                onClick={() => setActiveTab(t)}
+                className={`px-3 py-1 rounded ${
+                  activeTab === t ? "bg-indigo-600 text-white" : "bg-gray-100"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
 
-  {!vehicle?.hasVehicle ? (
-    <p className="text-gray-500">No vehicle available</p>
-  ) : activeTab === "private" ? (
-    <div className="grid grid-cols-2 gap-3">
-      <Info label="Auto Price/hr" value={vehicle.auto?.pricePerHour} />
-      <Info label="Auto Test Price" value={vehicle.auto?.testPricePerHour} />
-      <Info label="Manual Price/hr" value={vehicle.manual?.pricePerHour} />
-      <Info label="Manual Test Price" value={vehicle.manual?.testPricePerHour} />
-    </div>
-  ) : (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {!vehicle?.hasVehicle ? (
+            <p className="text-gray-500">No vehicle available</p>
+          ) : activeTab === "private" ? (
+            <div className="grid grid-cols-2 gap-3">
+              <Info label="Auto Price/hr" value={vehicle.auto?.pricePerHour} />
+              <Info
+                label="Auto Test Price"
+                value={vehicle.auto?.testPricePerHour}
+              />
+              <Info
+                label="Manual Price/hr"
+                value={vehicle.manual?.pricePerHour}
+              />
+              <Info
+                label="Manual Test Price"
+                value={vehicle.manual?.testPricePerHour}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {/* Pricing */}
+              <Info label="Price / Hour" value={`$${vehicle.pricePerHour}`} />
+              <Info
+                label="Test Price / Hour"
+                value={`$${vehicle.testPricePerHour}`}
+              />
 
-      {/* Pricing */}
-      <Info label="Price / Hour" value={`$${vehicle.pricePerHour}`} />
-      <Info label="Test Price / Hour" value={`$${vehicle.testPricePerHour}`} />
+              {/* Basic */}
+              <Info label="Make" value={vehicle.details?.make} />
+              <Info label="Model" value={vehicle.details?.model} />
+              <Info label="Color" value={vehicle.details?.color} />
+              <Info label="Year" value={vehicle.details?.year} />
 
-      {/* Basic */}
-      <Info label="Make" value={vehicle.details?.make} />
-      <Info label="Model" value={vehicle.details?.model} />
-      <Info label="Color" value={vehicle.details?.color} />
-      <Info label="Year" value={vehicle.details?.year} />
+              {/* Advanced */}
+              <Info
+                label="Transmission"
+                value={vehicle.details?.transmissionType}
+              />
+              <Info
+                label="Safety Rating"
+                value={vehicle.details?.ancapSafetyRating}
+              />
+              <Info
+                label="Dual Controls"
+                value={vehicle.details?.hasDualControls ? "Yes" : "No"}
+              />
 
-      {/* Advanced */}
-      <Info label="Transmission" value={vehicle.details?.transmissionType} />
-      <Info label="Safety Rating" value={vehicle.details?.ancapSafetyRating} />
-      <Info
-        label="Dual Controls"
-        value={vehicle.details?.hasDualControls ? "Yes" : "No"}
-      />
-
-      {/* Optional */}
-      <Info
-        label="Registration No"
-        value={vehicle.details?.registrationNumber}
-      />
-    </div>
-  )}
-</Card>
+              {/* Optional */}
+              <Info
+                label="Registration No"
+                value={vehicle.details?.registrationNumber}
+              />
+            </div>
+          )}
+        </Card>
 
         {/* Service Areas */}
         <Card title="Service Areas">
           {data.serviceAreas?.map((a: any) => (
-            <div key={a._id}>{a.suburb} ({a.state})</div>
+            <div key={a._id}>
+              {a.suburb} ({a.state})
+            </div>
           ))}
         </Card>
 
         {/* Test Locations */}
         <Card title="Test Locations">
           {data.testLocations?.map((l: any) => (
-            <div key={l._id}>{l.location} - {l.address}</div>
+            <div key={l._id}>
+              {l.location} - {l.address}
+            </div>
           ))}
         </Card>
 
         {/* Documents */}
-      <Card title="Documents">
-  {Object.entries(data.documents || {}).map(([key, doc]: any) => {
-    const hasAttachment = !!doc.attachment;
+        <Card title="Documents">
+          {Object.entries(data.documents || {}).map(([key, doc]: any) => {
+            const hasAttachment = !!doc.attachment;
 
-    return (
-      <div key={key} className="border-b pb-3 mb-3">
-        <p className="font-medium capitalize">{key}</p>
+            return (
+              <div key={key} className="border-b pb-3 mb-3">
+                <p className="font-medium capitalize">{key}</p>
 
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          <Info label="Document Number" value={doc.documentNumber} />
-          <Info label="Status" value={doc.status} />
-          <Info label="Issue Date" value={doc.issueDate || "-"} />
-          <Info label="Expiry Date" value={doc.expiryDate || "-"} />
-        </div>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <Info label="Document Number" value={doc.documentNumber} />
+                  <Info label="Status" value={doc.status} />
+                  <Info label="Issue Date" value={doc.issueDate || "-"} />
+                  <Info label="Expiry Date" value={doc.expiryDate || "-"} />
+                </div>
 
-        {/* Attachment Section */}
-        <div className="mt-3">
-          {hasAttachment ? (
-            <a
-              href={`${IMAGE_DOMAIN}/${doc.attachment.toString().replace("uploads/", "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700"
-            >
-              View Document
-            </a>
-          ) : (
-            <span className="text-xs text-gray-500 italic">
-              No attachment available
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  })}
-</Card>
+                {/* Attachment Section */}
+                <div className="mt-3">
+                  {hasAttachment ? (
+                    <a
+                      href={`${IMAGE_DOMAIN}/${doc.attachment.toString().replace("uploads/", "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700"
+                    >
+                      View Document
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-500 italic">
+                      No attachment available
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </Card>
 
         {/* Availability */}
         <AvailabilitySection availability={data.availability} />
 
+        <div className="flex gap-2">
+          {/* Active Toggle */}
+          {/* <button
+            onClick={async () => {
+              try {
+                setActionLoading(true);
+
+                if (data.isActive) {
+                  await deactivateInstructor(id);
+                  toast.success("Instructor deactivated");
+                } else {
+                  await activateInstructor(id);
+                  toast.success("Instructor activated");
+                }
+
+                const updated = await getInstructorProfile(id);
+                setData(updated);
+              } catch (err: any) {
+                toast.error(err?.message || "Something went wrong");
+              } finally {
+                setActionLoading(false);
+              }
+            }}
+            disabled={actionLoading}
+            className={`px-4 py-2 rounded text-white text-sm ${
+              data?.isActive
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {data?.isActive ? "Deactivate" : "Activate"}
+          </button> */}
+
+          {/* Publish Toggle */}
+          <button
+            onClick={handleTogglePublish}
+            disabled={actionLoading}
+            className={`px-4 py-2 rounded text-white text-sm ${
+              data?.isPublish
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-blue-600 hover:bg-blue-700"
+            } ${actionLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {actionLoading
+              ? "Processing..."
+              : data?.isPublish
+                ? "Unpublish"
+                : "Publish"}
+          </button>
+        </div>
       </div>
     </AdminPage>
   );

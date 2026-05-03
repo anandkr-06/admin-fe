@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getLeads } from "@/services/admin.service";
@@ -10,39 +10,55 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const res = await getLeads({
+        page,
+        limit: 10,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        search: search.trim() ? search : "",
+      });
+
+      setLeads(res.data || []);
+      setMeta(res.meta || null);
+    } finally {
+      setLoading(false);
+    }
+  }, [search, page]);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
+    const timeout = setTimeout(fetchData, 400);
+    return () => clearTimeout(timeout);
+  }, [fetchData]);
 
-        const res = await getLeads({
-          page: 1,
-          limit: 10,
-          sortBy: "createdAt",
-          sortOrder: "desc",
-        });
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
-        setLeads(res.data || []);
-        setMeta(res.meta || null);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchData();
+    }, 400);
 
-    fetchData();
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [search, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const totalLeads = meta?.total || 0;
 
-  const newLearners = leads.filter(
-    (l) => l.userType === "New Learner"
-  ).length;
+  const newLearners = leads.filter((l) => l.userType === "New Learner").length;
 
   const exploreSource = leads.filter(
-    (l) => l.source === "COURSE_EXPLORE"
+    (l) => l.source === "COURSE_EXPLORE",
   ).length;
 
   return (
@@ -50,9 +66,7 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">
-            Leads
-          </h1>
+          <h1 className="text-2xl font-semibold">Leads</h1>
           <p className="text-sm text-gray-500 mt-1">
             Track learner inquiries and interests
           </p>
@@ -67,11 +81,43 @@ export default function LeadsPage() {
       {/* KPI Section */}
       <div className="grid md:grid-cols-3 gap-6">
         <StatCard title="Total Leads" value={totalLeads} />
-        <StatCard title="New Learners" value={newLearners} color="text-green-600" />
-        <StatCard title="Course Explore Source" value={exploreSource} color="text-blue-600" />
+        <StatCard
+          title="New Learners"
+          value={newLearners}
+          color="text-green-600"
+        />
+        <StatCard
+          title="Course Explore Source"
+          value={exploreSource}
+          color="text-blue-600"
+        />
       </div>
 
       {/* Table */}
+      {/* <div className="p-4 border-b"> */}
+      {/* <input
+        type="text"
+        placeholder="Search by name, email, course, provider..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      /> */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search by name, email, course, provider..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {loading && (
+          <span className="absolute right-3 top-2 text-xs text-gray-400">
+            Searching...
+          </span>
+        )}
+      </div>
+      {/* </div> */}
       <Card className="rounded-2xl shadow-sm border">
         <CardContent className="p-0">
           {loading ? (
@@ -96,9 +142,7 @@ function StatCard({ title, value, color = "text-gray-900" }: any) {
     <Card className="rounded-2xl shadow-sm hover:shadow-md transition">
       <CardContent className="p-6">
         <p className="text-sm text-gray-500">{title}</p>
-        <p className={`text-3xl font-bold mt-2 ${color}`}>
-          {value}
-        </p>
+        <p className={`text-3xl font-bold mt-2 ${color}`}>{value}</p>
       </CardContent>
     </Card>
   );
@@ -113,6 +157,7 @@ function LeadsTable({ leads }: any) {
             <th className="p-4 text-left">Name</th>
             <th className="p-4 text-left">Contact</th>
             <th className="p-4 text-left">Course</th>
+            <th className="p-4 text-left">Provider</th>
             <th className="p-4 text-left">Category</th>
             <th className="p-4 text-left">User Type</th>
             <th className="p-4 text-left">Source</th>
@@ -132,13 +177,18 @@ function LeadsTable({ leads }: any) {
                 <div className="text-xs text-gray-500">{lead.phone}</div>
               </td>
 
-              <td className="p-4">
-                {lead.course?.courseName || "-"}
-              </td>
+              <td className="p-4">{lead.course?.courseName || "-"}</td>
 
               <td className="p-4">
-                {lead.course?.category || "-"}
+                <div className="font-medium">
+                  {lead.provider?.instituteName || "-"}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {lead.provider?.email || ""}
+                </div>
               </td>
+
+              <td className="p-4">{lead.course?.category || "-"}</td>
 
               <td className="p-4">
                 <UserTypeBadge type={lead.userType} />
@@ -150,12 +200,10 @@ function LeadsTable({ leads }: any) {
 
               <td className="p-4 text-xs">
                 <div>
-                  T&C:{" "}
-                  {lead.isAgreedToTermsAndConditions ? "✅" : "❌"}
+                  T&C: {lead.isAgreedToTermsAndConditions ? "✅" : "❌"}
                 </div>
                 <div>
-                  Offers:{" "}
-                  {lead.isAgreedToCommunicationAndOffers ? "✅" : "❌"}
+                  Offers: {lead.isAgreedToCommunicationAndOffers ? "✅" : "❌"}
                 </div>
               </td>
 
@@ -190,9 +238,7 @@ function EmptyState() {
   return (
     <div className="text-center py-20 space-y-4">
       <div className="text-6xl">📋</div>
-      <h2 className="text-xl font-semibold">
-        No Leads Found
-      </h2>
+      <h2 className="text-xl font-semibold">No Leads Found</h2>
       <p className="text-gray-500 text-sm">
         Leads will appear here when users explore courses.
       </p>

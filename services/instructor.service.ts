@@ -148,3 +148,12 @@ export async function getInstructorWallet(id: string) {
  
   return res.data
 }
+
+export function toggleInstructorPublish(
+  id: string,
+  action: "publish" | "unpublish"
+) {
+  return apiFetch(`/instructors/${id}/${action}`, {
+    method: "PATCH",
+  });
+}
