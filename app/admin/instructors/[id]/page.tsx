@@ -248,17 +248,34 @@ export default function InstructorProfilePage() {
           <p className="text-gray-500">{data.email}</p>
         </div>
 
+        
+
         {/* Metadata + Rating */}
         <div className="grid md:grid-cols-2 gap-6">
           <Card title="Metadata">
-            <Info label="ID" value={data.id} />
-            <Info
-              label="Created"
-              value={new Date(data.createdAt).toLocaleString()}
-            />
-            <Info label="Verified" value={data.isVerified ? "Yes" : "No"} />
-          </Card>
+  <Info label="ID" value={data.id} />
+  <Info
+    label="Created"
+    value={new Date(data.createdAt).toLocaleString()}
+  />
+  {/* <Info label="Verified" value={data.isVerified ? "Yes" : "No"} /> */}
 
+  {/* ✅ Stripe Verification */}
+  <div>
+    <p className="text-xs text-gray-500">Stripe Verified</p>
+
+    {data?.stripeAccountId ? (
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-green-600">Yes</span>
+        <span className="text-xs text-gray-500">
+          ({data.stripeAccountId})
+        </span>
+      </div>
+    ) : (
+      <span className="font-medium text-red-500">Not Verified</span>
+    )}
+  </div>
+</Card>
           <Card title="Rating">
             <Info label="Average" value={data.rating?.avg} />
             <Info label="Total" value={data.rating?.total} />
