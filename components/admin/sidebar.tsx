@@ -13,6 +13,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 
 import LogoutButton from "../LogoutButton";
@@ -35,17 +36,34 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { name: "Dashboard", href: "/admin", icon: Home, roles: ["ADMIN", "MANAGER"] },
+  {
+    name: "Dashboard",
+    href: "/admin",
+    icon: Home,
+    roles: ["ADMIN", "MANAGER"],
+  },
 
   {
     name: "Academics",
     icon: GraduationCap,
     roles: ["ADMIN", "MANAGER"],
     children: [
-      { name: "Instructors", href: "/admin/instructors", roles: ["ADMIN", "MANAGER"] },
-      { name: "Learners", href: "/admin/learners", roles: ["ADMIN", "MANAGER"] },
+      {
+        name: "Instructors",
+        href: "/admin/instructors",
+        roles: ["ADMIN", "MANAGER"],
+      },
+      {
+        name: "Learners",
+        href: "/admin/learners",
+        roles: ["ADMIN", "MANAGER"],
+      },
       { name: "Courses", href: "/admin/courses", roles: ["ADMIN", "MANAGER"] },
-      { name: "Course Providers", href: "/admin/course-providers", roles: ["ADMIN", "MANAGER"] },
+      {
+        name: "Course Providers",
+        href: "/admin/course-providers",
+        roles: ["ADMIN", "MANAGER"],
+      },
     ],
   },
 
@@ -59,13 +77,54 @@ const menuItems: MenuItem[] = [
       // { name: "Private Orders", href: "/admin/orders/private", roles: ["ADMIN", "MANAGER"] },
     ],
   },
-  { name: "Refunds", href: "/admin/refunds", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
-  { name: "No Show", href: "/admin/no-show", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
-  { name: "Leads", href: "/admin/leads", icon: ClipboardList, roles: ["ADMIN", "MANAGER"] },
-  { name: "Reviews", href: "/admin/reviews", icon: MessageSquare, roles: ["ADMIN", "MANAGER"] },
-  { name: "Feedbacks", href: "/admin/feedbacks", icon: MessageSquare, roles: ["ADMIN", "MANAGER"] },
-  { name: "Gift Vouchers", href: "/admin/gift-vouchers", icon: Gift, roles: ["ADMIN", "MANAGER"] },
-  { name: "Settings", href: "/admin/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
+  {
+    name: "Refunds",
+    href: "/admin/refunds",
+    icon: ClipboardList,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "No Show",
+    href: "/admin/no-show",
+    icon: ClipboardList,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Leads",
+    href: "/admin/leads",
+    icon: ClipboardList,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Suburbs",
+    href: "/admin/suburbs",
+    icon: MapPin,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Reviews",
+    href: "/admin/reviews",
+    icon: MessageSquare,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Feedbacks",
+    href: "/admin/feedbacks",
+    icon: MessageSquare,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Gift Vouchers",
+    href: "/admin/gift-vouchers",
+    icon: Gift,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    name: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
+    roles: ["ADMIN", "MANAGER"],
+  },
 ];
 
 export default function Sidebar({ user }: SidebarProps) {
@@ -83,9 +142,7 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-white p-4 shadow-sm">
       {/* Logo / Title */}
-      <h2 className="mb-8 text-xl font-semibold tracking-tight">
-        Admin Panel
-      </h2>
+      <h2 className="mb-8 text-xl font-semibold tracking-tight">Admin Panel</h2>
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col gap-1">
@@ -94,8 +151,9 @@ export default function Sidebar({ user }: SidebarProps) {
           .map((item) => {
             const Icon = item.icon;
 
-            const isActiveChild =
-              item.children?.some((child) => pathname === child.href);
+            const isActiveChild = item.children?.some(
+              (child) => pathname === child.href,
+            );
 
             const isOpen = openMenus[item.name] || isActiveChild;
 
@@ -176,9 +234,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {profileOpen && (
           <div className="absolute bottom-14 left-0 w-full rounded-lg bg-white p-3 shadow-lg border">
-            <div className="mb-2 text-xs text-gray-500">
-              {user.email}
-            </div>
+            <div className="mb-2 text-xs text-gray-500">{user.email}</div>
 
             <Link
               href="/admin/profile"

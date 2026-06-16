@@ -246,6 +246,7 @@ export default function InstructorProfilePage() {
         <div className="bg-white p-6 rounded-xl border">
           <h2 className="text-xl font-semibold">{data.name}</h2>
           <p className="text-gray-500">{data.email}</p>
+          <p className="text-gray-500">{data.mobileNumber}</p>
         </div>
 
         
