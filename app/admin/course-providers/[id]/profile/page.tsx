@@ -36,7 +36,7 @@ export default function ProviderProfilePage() {
       <div className="flex items-center gap-4">
         {data.logoUrl && (
           <img
-            src={`${process.env.NEXT_PUBLIC_IAMGE_URL}/${data.logoUrl.replace(/^uploads\//, "")}`}
+            src={`${process.env.NEXT_PUBLIC_IMAGE_MEDIA_URL}/${data.logoUrl.replace(/^uploads\//, "")}`}
             alt="logo"
             className="w-16 h-16 rounded-lg object-cover border"
           />

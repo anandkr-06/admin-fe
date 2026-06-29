@@ -238,12 +238,20 @@ export default function InstructorProfilePage() {
   if (!data) return <AdminPage title="Instructor Profile">Error</AdminPage>;
 
   const vehicle = data.vehicles?.[activeTab];
+//"uploads/USER_123/profile/1782667639924-776113051.png"
 
   return (
     <AdminPage title="Instructor Profile">
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white p-6 rounded-xl border">
+           {data.profileImage && (
+          <img
+            src={`${process.env.NEXT_PUBLIC_IMAGE_MEDIA_URL}/${data.profileImage.replace(/^uploads\//, "")}`}
+            alt="logo"
+            className="w-16 h-16 rounded-lg object-cover border"
+          />
+        )}
           <h2 className="text-xl font-semibold">{data.name}</h2>
           <p className="text-gray-500">{data.email}</p>
           <p className="text-gray-500">{data.mobileNumber}</p>

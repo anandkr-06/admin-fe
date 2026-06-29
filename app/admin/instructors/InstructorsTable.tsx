@@ -12,6 +12,7 @@ type Instructor = {
   lastName: string;
   email: string;
   isActive: boolean;
+  createdAt: string;
 };
 
 export default function InstructorsTable({
@@ -54,6 +55,7 @@ export default function InstructorsTable({
             <tr className="text-left text-gray-500 text-xs uppercase tracking-wider">
               <th className="p-5">Instructor</th>
               <th className="p-5">Email</th>
+              <th className="p-5">Created Date</th>
               <th className="p-5">Status</th>
               <th className="p-5 text-right">Actions</th>
             </tr>
@@ -88,7 +90,10 @@ export default function InstructorsTable({
                 <td className="p-5 text-gray-600">
                   {inst.email}
                 </td>
-
+                {/* Created Date */}
+                <td className="p-5 text-gray-600">
+                  {new Date(inst.createdAt).toLocaleDateString()}
+                </td>
                 {/* Status */}
                 <td className="p-5">
                   <StatusBadge isActive={inst.isActive} />
