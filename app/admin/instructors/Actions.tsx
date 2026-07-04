@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { deleteInstructor } from "@/services/instructor.service";
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import UploadVehicleModal from "./UploadVehicleModal";
 import { Car, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,12 @@ export function InstructorActions({ id }: { id: string }) {
             <Wallet className="mr-2 h-4 w-4" />
             Wallet Transactions
           </DropdownMenuItem>
+          <DropdownMenuItem
+  onSelect={() => router.push(`/admin/instructors/${id}/edit`)}
+>
+  <Pencil className="mr-2 h-4 w-4" />
+  Edit Profile
+</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setShowVehicleModal(true)}>
   <Car className="mr-2 h-4 w-4" />
   Upload Vehicle Images

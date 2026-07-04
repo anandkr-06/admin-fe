@@ -30,10 +30,13 @@ export function getInstructorProfile(id: string) {
 }
 
 /* ================= ORDERS ================= */
-export async function getInstructorOrders(id: string, params?: any) {
+export async function getInstructorOrders(
+  id: string,
+  params?: { page?: string | number; search?: string; status?: string }
+) {
   const query = new URLSearchParams();
 
-  if (params?.page) query.append("page", params.page);
+  if (params?.page !== undefined) query.append("page", String(params.page));
   if (params?.search) query.append("search", params.search);
   if (params?.status && params.status !== "ALL") {
     query.append("status", params.status);
@@ -130,6 +133,93 @@ export const uploadFileToStatic = async (file: File) => {
 
   return res.json(); // should return { url: "..." }
 };
+
+export const uploadProfileImageFile = async (file: File) => {
+  const tokenData = await fetch(`${ENV.IMAGE_UPLOAD_URL}get-token`);
+  const token = await tokenData.json();
+
+  const formData = new FormData();
+  formData.append("fileFor", "profile");
+  formData.append("file", file);
+
+  const res = await fetch(`${ENV.IMAGE_UPLOAD_URL}file`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token?.token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("File upload failed");
+  }
+
+  return res.json();
+};
+
+export const uploadVehicleImageFile = async (file: File) => {
+  const tokenData = await fetch(`${ENV.IMAGE_UPLOAD_URL}get-token`);
+
+  if (!tokenData.ok) {
+    throw new Error("Unable to prepare vehicle image upload");
+  }
+
+  const token = await tokenData.json();
+
+  const formData = new FormData();
+  formData.append("fileFor", "vehicle");
+  formData.append("file", file);
+
+  const res = await fetch(`${ENV.IMAGE_UPLOAD_URL}file`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token?.token}`,
+    },
+  });
+
+  if (!res.ok) {
+    let message = "Vehicle image upload failed";
+
+    try {
+      const error = await res.json();
+      message = error?.message || error?.error || message;
+    } catch {
+      message = res.status === 413 ? "Vehicle image is too large" : message;
+    }
+
+    throw new Error(message);
+  }
+
+  return res.json();
+};
+
+export const uploadInstructorDocumentFile = async (
+  file: File,
+  documentKey: string
+) => {
+  const tokenData = await fetch(`${ENV.IMAGE_UPLOAD_URL}get-token`);
+  const token = await tokenData.json();
+
+  const formData = new FormData();
+  formData.append("fileFor", documentKey);
+  formData.append("file", file);
+
+  const res = await fetch(`${ENV.IMAGE_UPLOAD_URL}file`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token?.token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("File upload failed");
+  }
+
+  return res.json();
+};
+
 export async function uploadInstructorVehicles(
   instructorId: string,
   vehicles: {
@@ -155,5 +245,101 @@ export function toggleInstructorPublish(
 ) {
   return apiFetch(`/instructors/${id}/${action}`, {
     method: "PATCH",
+  });
+}
+
+
+
+export function updateInstructorProfile(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorDocuments(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/documents`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorServiceAreas(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/service-areas`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getAvailableSuburbs(search: string) {
+  const query = search.trim();
+  return apiFetch(
+    `/api/suburbs/v1/get_available_suburbs?page=1&limit=50&search=${encodeURIComponent(query)}`
+  );
+}
+
+export function getTestLocationOptions(search: string) {
+  const query = search.trim();
+  return apiFetch(
+    `/api/testlocation/v1/get_test_locations?page=1&limit=20&search=${encodeURIComponent(query)}`
+  );
+}
+
+export function updateInstructorTestLocations(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/test-locations`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorAutoVehicle(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/vehicle/auto`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorManualVehicle(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/vehicle/manual`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorPrivateVehicle(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/vehicle/private`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateInstructorAdditionalInformation(
+  id: string,
+  payload: Record<string, unknown>
+) {
+  return apiFetch(`/instructors/${id}/additional-information`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
