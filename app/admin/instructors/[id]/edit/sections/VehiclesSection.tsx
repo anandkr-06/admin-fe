@@ -207,16 +207,16 @@ export default function VehiclesSection({ instructorId, data, onSuccess }: Props
         </div>
 
         <div className="flex flex-col items-start gap-2">
-          <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100">
+          {/* <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100">
             <Camera className="h-4 w-4 text-slate-500" />
-            <span>{vehicleImage ? "Change image" : "Upload image"}</span>
-            <input
+            {/* <span>{vehicleImage ? "Change image" : "Upload image"}</span> */}
+            {/* <input
               type="file"
               accept="image/*"
               className="hidden"
               onChange={uploadVehicleImage}
-            />
-          </label>
+            /> */}
+          {/* </label> */}
 
           {uploading && (
             <p className="text-sm text-gray-500">Uploading...</p>
