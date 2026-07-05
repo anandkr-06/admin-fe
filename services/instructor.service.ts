@@ -260,6 +260,16 @@ export function updateInstructorProfile(
   });
 }
 
+export function updateInstructorPassword(
+  id: string,
+  payload: { password: string }
+) {
+  return apiFetch(`/instructors/${id}/updatePassword`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function updateInstructorDocuments(
   id: string,
   payload: Record<string, unknown>

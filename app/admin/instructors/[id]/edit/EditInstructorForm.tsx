@@ -9,6 +9,7 @@ import {
   MapPin,
   Car,
   Languages,
+  KeyRound,
 } from "lucide-react";
 import PersonalDetails from "./sections/PersonalDetails";
 import DocumentsSection from "./sections/DocumentsSection";
@@ -16,6 +17,7 @@ import ServiceAreasSection from "./sections/ServiceAreasSection";
 import TestLocationsSection from "./sections/TestLocationsSection";
 import VehiclesSection from "./sections/VehiclesSection";
 import AdditionalInformationSection from "./sections/AdditionalInformationSection";
+import ResetPasswordSection from "./sections/ResetPasswordSection";
 
 interface Props {
   instructor: any;
@@ -46,6 +48,11 @@ const tabs = [
     key: "vehicles",
     label: "Vehicles",
     icon: Car,
+  },
+  {
+    key: "password",
+    label: "Reset Password",
+    icon: KeyRound,
   },
   {
     key: "additional",
@@ -146,6 +153,13 @@ export default function EditInstructorForm({
             <VehiclesSection
               instructorId={instructor._id}
               data={instructor}
+              onSuccess={() => {}}
+            />
+          )}
+
+          {activeTab === "password" && (
+            <ResetPasswordSection
+              instructorId={instructor._id}
               onSuccess={() => {}}
             />
           )}

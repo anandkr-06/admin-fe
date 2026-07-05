@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -63,6 +63,8 @@ type Props = {
 type FormData = {
   firstName: string;
   lastName: string;
+  email: string;
+  mobileNumber: string;
   dob: string;
   postCode: string;
   transmissionType: string;
@@ -109,6 +111,8 @@ export default function PersonalDetails({
     defaultValues: {
       firstName: data?.firstName || "",
       lastName: data?.lastName || "",
+      email: data?.email || "",
+      mobileNumber: data?.mobileNumber || data?.mobile || "",
       dob: data?.dob ? data.dob.substring(0, 10) : "",
       postCode: data?.postCode || "",
       transmissionType: data?.transmissionType || "auto",
@@ -128,6 +132,8 @@ export default function PersonalDetails({
     reset({
       firstName: data.firstName || "",
       lastName: data.lastName || "",
+      email: data.email || "",
+      mobileNumber: data.mobileNumber || data.mobile || "",
       dob: data.dob
         ? data.dob.substring(0, 10)
         : "",
@@ -183,6 +189,8 @@ export default function PersonalDetails({
     const payload = {
       firstName: form.firstName,
       lastName: form.lastName,
+      email: form.email,
+      mobileNumber: form.mobileNumber,
       dob: form.dob,
       postCode: form.postCode,
       transmissionType: form.transmissionType,
@@ -216,7 +224,6 @@ export default function PersonalDetails({
   };
 
   return (
-    <>
       <form
     onSubmit={handleSubmit(onSubmit)}
     className="space-y-6"
@@ -324,6 +331,53 @@ export default function PersonalDetails({
       <div>
 
         <label className="block mb-2 text-sm font-medium">
+          Email
+        </label>
+
+        <Input
+          type="email"
+          {...register("email", {
+            required: "Email is required",
+          })}
+        />
+
+        {errors.email && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.email.message}
+          </p>
+        )}
+
+      </div>
+
+      <div>
+
+        <label className="block mb-2 text-sm font-medium">
+          Mobile Number
+        </label>
+
+        <Input
+          {...register("mobileNumber", {
+            required: "Mobile number is required",
+          })}
+        />
+
+        {errors.mobileNumber && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.mobileNumber.message}
+          </p>
+        )}
+
+      </div>
+
+    </div>
+
+    {/* Third Row */}
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div>
+
+        <label className="block mb-2 text-sm font-medium">
           Date Of Birth
         </label>
 
@@ -348,7 +402,7 @@ export default function PersonalDetails({
 
     </div>
 
-    {/* Third Row */}
+    {/* Fourth Row */}
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -478,6 +532,5 @@ export default function PersonalDetails({
       </Button>
     </div>
     </form>
-    </>
   );
 }
