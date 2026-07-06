@@ -13,6 +13,7 @@ type Instructor = {
   email: string;
   isActive: boolean;
   createdAt: string;
+  isPaid: boolean;
 };
 
 export default function InstructorsTable({
@@ -57,6 +58,7 @@ export default function InstructorsTable({
               <th className="p-5">Email</th>
               <th className="p-5">Created Date</th>
               <th className="p-5">Status</th>
+              <th className="p-5">IsPaid</th>
               <th className="p-5 text-right">Actions</th>
             </tr>
           </thead>
@@ -97,6 +99,10 @@ export default function InstructorsTable({
                 {/* Status */}
                 <td className="p-5">
                   <StatusBadge isActive={inst.isActive} />
+                </td>
+                {console.log("🚀 ~ file: InstructorsTable.tsx:123 ~ InstructorsTable ~ inst.isPaid:", inst.isPaid)}
+                 <td className="p-5 text-gray-600">
+                  {inst.isPaid? "true": "false"}
                 </td>
 
                 {/* Actions */}
