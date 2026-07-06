@@ -92,7 +92,6 @@ export default function InstructorsTable({
                 <td className="p-5 text-gray-600">
                   {inst.email}
                 </td>
-                {/* Created Date */}
                 <td className="p-5 text-gray-600">
                   {new Date(inst.createdAt).toLocaleDateString()}
                 </td>
@@ -100,9 +99,8 @@ export default function InstructorsTable({
                 <td className="p-5">
                   <StatusBadge isActive={inst.isActive} />
                 </td>
-                {console.log("🚀 ~ file: InstructorsTable.tsx:123 ~ InstructorsTable ~ inst.isPaid:", inst.isPaid)}
-                 <td className="p-5 text-gray-600">
-                  {inst.isPaid? "true": "false"}
+                <td className="p-5 text-gray-600">
+                  {inst.isPaid ? "true" : "false"}
                 </td>
 
                 {/* Actions */}
