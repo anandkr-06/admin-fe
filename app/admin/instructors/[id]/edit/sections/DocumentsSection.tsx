@@ -72,7 +72,7 @@ const DOCUMENTS: DocumentConfig[] = [
   },
   {
     key: "blueCard",
-    label: "Blue Card",
+    label: "WWCC/Blue Card",
     hasExpiryDate: true,
   },
   {
