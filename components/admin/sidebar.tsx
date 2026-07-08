@@ -101,6 +101,12 @@ const menuItems: MenuItem[] = [
     icon: MapPin,
     roles: ["ADMIN", "MANAGER"],
   },
+   {
+    name: "Test Locations",
+    href: "/admin/test-locations",
+    icon: MapPin,
+    roles: ["ADMIN", "MANAGER"],
+  },
   {
     name: "Reviews",
     href: "/admin/reviews",
