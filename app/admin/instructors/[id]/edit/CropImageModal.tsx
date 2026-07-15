@@ -80,9 +80,9 @@ export default function CropImageModal({ image, onClose, onCropDone }: Props) {
             Zoom
             <input
               type="range"
-              min={1}
-              max={3}
-              step={0.1}
+              min={0.5}
+              max={5}
+              step={0.05}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
               className="mt-2 w-full"
