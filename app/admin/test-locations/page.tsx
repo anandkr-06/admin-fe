@@ -30,6 +30,7 @@ function TestLocationsTable({ locations, onEdit }: any) {
             <th className="p-4 text-left">Suburb</th>
             <th className="p-4 text-left">State</th>
             <th className="p-4 text-left">Postcode</th>
+            <th className="p-4 text-left">Active</th>
             <th className="p-4 text-left">Action</th>
           </tr>
         </thead>
@@ -42,6 +43,7 @@ function TestLocationsTable({ locations, onEdit }: any) {
               <td className="p-4">{loc.suburb}</td>
               <td className="p-4">{loc.state}</td>
               <td className="p-4">{loc.postCode}</td>
+               <td className="p-4">{loc.isActive ? "Yes" : "No"}</td>
               <td className="p-4">
                 <Button size="sm" variant="outline" onClick={() => onEdit(loc)}>
                   Edit
@@ -73,13 +75,14 @@ export default function TestLocationsPage() {
     address: "",
     suburb: "",
     postCode: "",
+    isActive: true,
   });
 
   const [saving, setSaving] = useState(false);
 
   const handleAdd = () => {
     setEditing(null);
-    setForm({ state: "", location: "", address: "", suburb: "", postCode: "" });
+    setForm({ state: "", location: "", address: "", suburb: "", postCode: "" , isActive: true,});
     setOpenModal(true);
   };
 
@@ -91,6 +94,7 @@ export default function TestLocationsPage() {
       address: loc.address || "",
       suburb: loc.suburb || "",
       postCode: String(loc.postCode || ""),
+       isActive: loc.isActive ?? true,
     });
     setOpenModal(true);
   };
@@ -105,6 +109,7 @@ export default function TestLocationsPage() {
         address: form.address,
         suburb: form.suburb,
         postCode: Number(form.postCode || 0),
+        isActive: form.isActive,
       };
 
       if (editing) {
@@ -210,7 +215,19 @@ export default function TestLocationsPage() {
             <Input placeholder="Suburb" value={form.suburb} onChange={(e) => setForm({ ...form, suburb: e.target.value })} />
             <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
             <Input placeholder="Postcode" value={form.postCode} onChange={(e) => setForm({ ...form, postCode: e.target.value })} />
-
+             <select
+  value={form.isActive ? "true" : "false"}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      isActive: e.target.value === "true",
+    })
+  }
+  className="w-full border rounded-md px-3 py-2"
+>
+  <option value="true">Active</option>
+  <option value="false">Inactive</option>
+</select>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setOpenModal(false)}>Cancel</Button>
               <Button disabled={saving} onClick={handleSubmit}>{saving ? "Saving..." : editing ? "Update" : "Create"}</Button>

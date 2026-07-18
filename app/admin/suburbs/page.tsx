@@ -34,6 +34,7 @@ function SuburbsTable({
             <th className="p-4 text-left">Postcode</th>
             <th className="p-4 text-left">Latitude</th>
             <th className="p-4 text-left">Longitude</th>
+            <th className="p-4 text-left">Active</th>
             <th className="p-4 text-left">Action</th>
           </tr>
         </thead>
@@ -46,6 +47,7 @@ function SuburbsTable({
               <td className="p-4">{suburb.postcode}</td>
               <td className="p-4">{suburb.lat}</td>
               <td className="p-4">{suburb.long}</td>
+              <td className="p-4">{suburb.isActive ? "Yes" : "No"}</td>
 
               <td className="p-4">
                 <Button
@@ -83,6 +85,7 @@ export default function SuburbsPage() {
     postcode: "",
     lat: "",
     long: "",
+    isActive: true,
   });
 
   const [saving, setSaving] = useState(false);
@@ -96,6 +99,7 @@ export default function SuburbsPage() {
       postcode: "",
       lat: "",
       long: "",
+      isActive: true,
     });
 
     setOpenModal(true);
@@ -110,6 +114,7 @@ export default function SuburbsPage() {
       postcode: suburb.postcode,
       lat: String(suburb.lat),
       long: String(suburb.long),
+      isActive: suburb.isActive,
     });
 
     setOpenModal(true);
@@ -125,6 +130,7 @@ export default function SuburbsPage() {
         postcode: formData.postcode,
         lat: Number(formData.lat),
         long: Number(formData.long),
+         isActive: formData.isActive,
       };
 
       if (editingSuburb) {
@@ -299,6 +305,22 @@ export default function SuburbsPage() {
                 })
               }
             />
+            {/* <div className="flex items-center justify-between border rounded-md px-3 py-2"> */}
+            {/* <label className="text-sm font-medium">Active</label> */}
+            <select
+              value={formData.isActive ? "true" : "false"}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  isActive: e.target.value === "true",
+                })
+              }
+              className="w-full border rounded-md px-3 py-2"
+            >
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+            {/* </div> */}
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setOpenModal(false)}>
