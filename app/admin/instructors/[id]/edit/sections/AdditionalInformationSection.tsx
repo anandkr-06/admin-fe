@@ -118,17 +118,21 @@ export default function AdditionalInformationSection({ instructorId, data, onSuc
       </div>
 
       <div>
-        <label className="block mb-2 text-sm font-medium">Instructor Experience Years</label>
+        <label className="block mb-2 text-sm font-medium">Instructor Experience Since Years</label>
         <select
           {...register("instructorExperienceYears")}
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-600 focus:outline-none"
         >
           <option value="">Select experience</option>
-          {Array.from({ length: 40 }, (_, i) => i + 1).map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
+          {Array.from({ length: 40 }, (_, i) => {
+  const year = new Date().getFullYear() - i;
+
+  return (
+    <option key={year} value={year}>
+      {year}
+    </option>
+  );
+})}
         </select>
       </div>
 

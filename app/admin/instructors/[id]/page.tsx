@@ -338,7 +338,7 @@ export default function InstructorProfilePage() {
               <Info label="Make" value={vehicle.details?.make} />
               <Info label="Model" value={vehicle.details?.model} />
               <Info label="Color" value={vehicle.details?.color} />
-              <Info label="Year" value={vehicle.details?.year} />
+              <Info label="Industry Experince Since Year" value={vehicle.details?.year} />
 
               {/* Advanced */}
               <Info
