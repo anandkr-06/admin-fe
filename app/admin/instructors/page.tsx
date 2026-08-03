@@ -29,7 +29,7 @@ export default async function InstructorsPage({
       <h1 className="mb-4 text-2xl font-bold">Instructors</h1>
 
       <Filters />
-
+      
       <InstructorsTable
         instructors={data.data}
         meta={data.meta}

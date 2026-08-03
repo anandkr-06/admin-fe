@@ -64,8 +64,8 @@ export default function VehiclesSection({ instructorId, data, onSuccess }: Props
       transmissionType: "auto",
       ancapSafetyRating: "",
       hasDualControls: false,
-      pricePerHour: "",
-      testPricePerHour: "",
+      pricePerHour: 0,
+      testPricePerHour: 0,
     },
   });
 
@@ -97,8 +97,8 @@ export default function VehiclesSection({ instructorId, data, onSuccess }: Props
       transmissionType: vehicle.transmissionType || "auto",
       ancapSafetyRating: vehicle.ancapSafetyRating || "",
       hasDualControls: Boolean(vehicle.hasDualControls),
-      pricePerHour: vehicle.pricePerHour || "",
-      testPricePerHour: vehicle.testPricePerHour || "",
+      pricePerHour: vehicle.pricePerHour || 0,
+      testPricePerHour: vehicle.testPricePerHour || 0,
     });
 
     const vehicleImages = data?.vehicleImages || data?.vehiclesImage || [];

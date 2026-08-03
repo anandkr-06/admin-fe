@@ -43,7 +43,7 @@ function TestLocationsTable({ locations, onEdit }: any) {
               <td className="p-4">{loc.suburb}</td>
               <td className="p-4">{loc.state}</td>
               <td className="p-4">{loc.postCode}</td>
-               <td className="p-4">{loc.isActive ? "Yes" : "No"}</td>
+              <td className="p-4">{loc.isActive ? "Yes" : "No"}</td>
               <td className="p-4">
                 <Button size="sm" variant="outline" onClick={() => onEdit(loc)}>
                   Edit
@@ -82,7 +82,14 @@ export default function TestLocationsPage() {
 
   const handleAdd = () => {
     setEditing(null);
-    setForm({ state: "", location: "", address: "", suburb: "", postCode: "" , isActive: true,});
+    setForm({
+      state: "",
+      location: "",
+      address: "",
+      suburb: "",
+      postCode: "",
+      isActive: true,
+    });
     setOpenModal(true);
   };
 
@@ -94,7 +101,7 @@ export default function TestLocationsPage() {
       address: loc.address || "",
       suburb: loc.suburb || "",
       postCode: String(loc.postCode || ""),
-       isActive: loc.isActive ?? true,
+      isActive: loc.isActive ?? true,
     });
     setOpenModal(true);
   };
@@ -151,12 +158,28 @@ export default function TestLocationsPage() {
 
   useEffect(() => setPage(1), [search]);
 
+  const totalPages = meta?.totalPages || 1;
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, page + 2);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-semibold">Test Locations</h1>
-          <p className="text-sm text-gray-500">Manage test locations used across the app</p>
+          <p className="text-sm text-gray-500">
+            Manage test locations used across the app
+          </p>
         </div>
 
         <Button onClick={handleAdd}>+ Add Test Location</Button>
@@ -172,9 +195,17 @@ export default function TestLocationsPage() {
       </div>
 
       <div className="flex gap-3">
-        <Input placeholder="Search location..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input
+          placeholder="Search location..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        <select value={limit} onChange={(e) => setLimit(Number(e.target.value))} className="border px-3 py-2 rounded-lg">
+        <select
+          value={limit}
+          onChange={(e) => setLimit(Number(e.target.value))}
+          className="border px-3 py-2 rounded-lg"
+        >
           <option value={6}>6</option>
           <option value={12}>12</option>
           <option value={24}>24</option>
@@ -191,14 +222,66 @@ export default function TestLocationsPage() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" disabled={page === 1} onClick={() => setPage((prev) => prev - 1)}>
+      <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+        {/* Previous */}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+        >
           Previous
         </Button>
 
-        <span className="px-4 py-2 text-sm">Page {page} of {meta?.totalPages || 1}</span>
+        {/* First Page */}
+        {page > 3 && (
+          <>
+            <Button
+              size="sm"
+              variant={page === 1 ? "default" : "outline"}
+              onClick={() => setPage(1)}
+            >
+              1
+            </Button>
 
-        <Button variant="outline" disabled={page >= (meta?.totalPages || 1)} onClick={() => setPage((prev) => prev + 1)}>
+            {page > 4 && <span className="px-1">...</span>}
+          </>
+        )}
+
+        {/* Middle Pages */}
+        {getPageNumbers().map((pageNumber) => (
+          <Button
+            key={pageNumber}
+            size="sm"
+            variant={page === pageNumber ? "default" : "outline"}
+            onClick={() => setPage(pageNumber)}
+          >
+            {pageNumber}
+          </Button>
+        ))}
+
+        {/* Last Page */}
+        {page < totalPages - 2 && (
+          <>
+            {page < totalPages - 3 && <span className="px-1">...</span>}
+
+            <Button
+              size="sm"
+              variant={page === totalPages ? "default" : "outline"}
+              onClick={() => setPage(totalPages)}
+            >
+              {totalPages}
+            </Button>
+          </>
+        )}
+
+        {/* Next */}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+        >
           Next
         </Button>
       </div>
@@ -206,31 +289,57 @@ export default function TestLocationsPage() {
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Test Location" : "Add Test Location"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Edit Test Location" : "Add Test Location"}
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            <Input placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            <Input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-            <Input placeholder="Suburb" value={form.suburb} onChange={(e) => setForm({ ...form, suburb: e.target.value })} />
-            <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-            <Input placeholder="Postcode" value={form.postCode} onChange={(e) => setForm({ ...form, postCode: e.target.value })} />
-             <select
-  value={form.isActive ? "true" : "false"}
-  onChange={(e) =>
-    setForm({
-      ...form,
-      isActive: e.target.value === "true",
-    })
-  }
-  className="w-full border rounded-md px-3 py-2"
->
-  <option value="true">Active</option>
-  <option value="false">Inactive</option>
-</select>
+            <Input
+              placeholder="Location"
+              value={form.location}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+            />
+            <Input
+              placeholder="Address"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+            <Input
+              placeholder="Suburb"
+              value={form.suburb}
+              onChange={(e) => setForm({ ...form, suburb: e.target.value })}
+            />
+            <Input
+              placeholder="State"
+              value={form.state}
+              onChange={(e) => setForm({ ...form, state: e.target.value })}
+            />
+            <Input
+              placeholder="Postcode"
+              value={form.postCode}
+              onChange={(e) => setForm({ ...form, postCode: e.target.value })}
+            />
+            <select
+              value={form.isActive ? "true" : "false"}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  isActive: e.target.value === "true",
+                })
+              }
+              className="w-full border rounded-md px-3 py-2"
+            >
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpenModal(false)}>Cancel</Button>
-              <Button disabled={saving} onClick={handleSubmit}>{saving ? "Saving..." : editing ? "Update" : "Create"}</Button>
+              <Button variant="outline" onClick={() => setOpenModal(false)}>
+                Cancel
+              </Button>
+              <Button disabled={saving} onClick={handleSubmit}>
+                {saving ? "Saving..." : editing ? "Update" : "Create"}
+              </Button>
             </div>
           </div>
         </DialogContent>

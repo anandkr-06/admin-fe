@@ -130,7 +130,7 @@ export default function SuburbsPage() {
         postcode: formData.postcode,
         lat: Number(formData.lat),
         long: Number(formData.long),
-         isActive: formData.isActive,
+        isActive: formData.isActive,
       };
 
       if (editingSuburb) {
@@ -181,6 +181,20 @@ export default function SuburbsPage() {
     setPage(1);
   }, [search]);
 
+  const totalPages = meta?.totalPages || 1;
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, page + 2);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -221,23 +235,58 @@ export default function SuburbsPage() {
           )}
         </CardContent>
       </Card>
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
         <Button
           variant="outline"
+          size="sm"
           disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
+          onClick={() => setPage(page - 1)}
         >
           Previous
         </Button>
 
-        <span className="px-4 py-2 text-sm">
-          Page {page} of {meta?.totalPages || 1}
-        </span>
+        {page > 3 && (
+          <>
+            <Button
+              variant={page === 1 ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPage(1)}
+            >
+              1
+            </Button>
+            {page > 4 && <span>...</span>}
+          </>
+        )}
+
+        {getPageNumbers().map((pageNumber) => (
+          <Button
+            key={pageNumber}
+            size="sm"
+            variant={page === pageNumber ? "default" : "outline"}
+            onClick={() => setPage(pageNumber)}
+          >
+            {pageNumber}
+          </Button>
+        ))}
+
+        {page < totalPages - 2 && (
+          <>
+            {page < totalPages - 3 && <span>...</span>}
+            <Button
+              variant={page === totalPages ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPage(totalPages)}
+            >
+              {totalPages}
+            </Button>
+          </>
+        )}
 
         <Button
           variant="outline"
-          disabled={page >= (meta?.totalPages || 1)}
-          onClick={() => setPage((prev) => prev + 1)}
+          size="sm"
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
         >
           Next
         </Button>

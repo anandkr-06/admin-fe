@@ -14,6 +14,7 @@ type Instructor = {
   isActive: boolean;
   createdAt: string;
   isPaid: boolean;
+  isPublish: boolean;
 };
 
 export default function InstructorsTable({
@@ -67,7 +68,12 @@ export default function InstructorsTable({
             {instructors.map((inst) => (
               <tr
                 key={inst._id}
-                className="border-b last:border-none hover:bg-gray-50/70 transition-all duration-200"
+                className={`border-b last:border-none transition-all duration-200 ${
+    inst.isPublish
+      ? "bg-green-200/60 hover:bg-green-200/60"
+      : "hover:bg-gray-50/70"
+  }`}
+                style={{ cursor: "pointer" }}
               >
                 {/* Instructor Info */}
                 <td className="p-5">
